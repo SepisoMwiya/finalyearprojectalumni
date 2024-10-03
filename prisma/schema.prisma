@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  imageUrl    String?  @db.VarChar(255)
+  startDate   DateTime
+  endDate     DateTime?
+  fundingGoal Int?
+  status      ProjectStatus
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  categories  ProjectCategoryRelation[]
+}
+
+model ProjectCategory {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique @db.VarChar(100)
+  projects ProjectCategoryRelation[]
+}
+
+model ProjectCategoryRelation {
+  project   Project         @relation(fields: [projectId], references: [id])
+  projectId Int
+  category  ProjectCategory @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([projectId, categoryId])
+}
+
+enum ProjectStatus {
+  PLANNED
+  ONGOING
+  COMPLETED
+}
+
+
