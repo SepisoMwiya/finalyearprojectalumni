@@ -1,32 +1,21 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProjectCard from "./ProjectCard"; // We'll create this component
-import { Project } from "@prisma/client"; // Import types from Prisma
-import LoadingSkeleton from "./loading-skeleton"; // Import the loading skeleton component
+import ProjectCard from "./ProjectCard";
+import { Project } from "@prisma/client";
 
-function FeaturedProjectsSection() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true); // Add loading state
+interface FeaturedProjectsSectionProps {
+  initialProjects: Project[];
+}
+
+function FeaturedProjectsSection({ initialProjects }: FeaturedProjectsSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Fetch projects from the API
-    const fetchProjects = async () => {
-      const response = await fetch("/api/projects");
-      const data = await response.json();
-      setProjects(data);
-      setLoading(false); // Set loading to false after fetching
-    };
-
-    fetchProjects();
-  }, []);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 320; // Adjust this value based on your card width
+      const scrollAmount = 320;
       scrollContainerRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -49,18 +38,9 @@ function FeaturedProjectsSection() {
           ref={scrollContainerRef}
           className="flex gap-4 items-center justify-start overflow-x-hidden mb-12"
         >
-          {loading ? (
-            // Show loading skeletons while loading
-            Array.from({ length: 5 }).map((_, index) => (
-              <LoadingSkeleton key={index} />
-            ))
-          ) : Array.isArray(projects) && projects.length > 0 ? (
-            projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))
-          ) : (
-            <p>No projects available.</p> // Fallback message if no projects
-          )}
+          {initialProjects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
         </div>
         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-4">
           <Button
