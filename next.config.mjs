@@ -7,7 +7,8 @@ const nextConfig = {
       "images.pexels.com",
       "i.pinimg.com",
       "via.placeholder.com",
-      "images.unsplash.com", // Add this line
+      "images.unsplash.com",
+      "randomuser.me",
     ],
     remotePatterns: [
       {
