@@ -7,7 +7,7 @@ export default async function Home() {
   const featuredProjects = await db.project.findMany({
     take: 10,
     orderBy: {
-      createdAt: 'desc'
+      createdAt: "desc",
     },
     include: {
       categories: {
@@ -26,3 +26,5 @@ export default async function Home() {
     </>
   );
 }
+
+// checking if the github setup is configured
