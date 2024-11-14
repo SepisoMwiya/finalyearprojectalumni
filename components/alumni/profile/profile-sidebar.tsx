@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Mail, Linkedin, Award, BookOpen, MapPin } from "lucide-react";
 import { Alumni, Skill, Achievement } from "@prisma/client";
 import AddSkillModal from "./add-skill-modal";
+import AddAchievementModal from "./add-achievement-modal";
 import { useRouter } from "next/navigation";
 
 interface ProfileSidebarProps {
@@ -24,8 +25,14 @@ export default function ProfileSidebar({
 }: ProfileSidebarProps) {
   const router = useRouter();
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
+  const [isAddAchievementModalOpen, setIsAddAchievementModalOpen] =
+    useState(false);
 
   const handleSkillAdded = () => {
+    router.refresh();
+  };
+
+  const handleAchievementAdded = () => {
     router.refresh();
   };
 
@@ -121,7 +128,12 @@ export default function ProfileSidebar({
             ))}
           </ul>
           {isOwnProfile && (
-            <Button variant="ghost" size="sm" className="mt-4 w-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4 w-full"
+              onClick={() => setIsAddAchievementModalOpen(true)}
+            >
               Add Achievement
             </Button>
           )}
@@ -176,6 +188,13 @@ export default function ProfileSidebar({
         onClose={() => setIsAddSkillModalOpen(false)}
         alumniId={profile.id}
         onSkillAdded={handleSkillAdded}
+      />
+
+      <AddAchievementModal
+        isOpen={isAddAchievementModalOpen}
+        onClose={() => setIsAddAchievementModalOpen(false)}
+        alumniId={profile.id}
+        onAchievementAdded={handleAchievementAdded}
       />
     </div>
   );
