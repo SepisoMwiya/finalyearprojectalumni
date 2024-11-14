@@ -4,6 +4,7 @@ import AlumniGrid from "@/components/alumni/alumni-grid";
 import AlumniStats from "@/components/alumni/alumni-stats";
 import SuggestedConnections from "@/components/alumni/suggested-connections";
 import AlumniFilters from "@/components/alumni/alumni-filters";
+import { db } from "@/lib/prisma";
 import {
   Users,
   Award,
@@ -14,17 +15,60 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-function AlumniPage() {
+async function getAlumniStats() {
+  const totalAlumni = await db.alumni.count();
+  const countries = await db.alumni.groupBy({
+    by: ['country'],
+  });
+  
+  return {
+    totalAlumni,
+    totalCountries: countries.length,
+  };
+}
+
+async function getAlumni(searchQuery?: string, currentUserId?: string) {
+  const whereClause = searchQuery
+    ? {
+        OR: [
+          { firstName: { contains: searchQuery } },
+          { lastName: { contains: searchQuery } },
+          { currentCompany: { contains: searchQuery } },
+          { school: { contains: searchQuery } },
+          { country: { contains: searchQuery } },
+          { city: { contains: searchQuery } },
+        ],
+      }
+    : {};
+
+  const alumni = await db.alumni.findMany({
+    where: whereClause,
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return alumni;
+}
+
+export default async function AlumniPage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
+  const { totalAlumni, totalCountries } = await getAlumniStats();
+  const alumni = await getAlumni(searchParams.q);
+
   const stats = [
     {
       icon: <Users className="w-8 h-8" />,
-      value: "10,000+",
+      value: `${totalAlumni}+`,
       label: "Active Alumni",
       description: "Worldwide network",
     },
     {
       icon: <Globe className="w-8 h-8" />,
-      value: "50+",
+      value: `${totalCountries}+`,
       label: "Countries",
       description: "Global presence",
     },
@@ -55,7 +99,7 @@ function AlumniPage() {
   ];
 
   return (
-    <div className="container py-8">
+    <div className="container mx-auto py-8">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">UNZA Alumni Network</h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
@@ -82,19 +126,20 @@ function AlumniPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <AlumniFilters />
-        </div>
-        <div className="lg:col-span-3">
-          <AlumniSearch />
-          <AlumniGrid />
-        </div>
+      <div className="mb-8">
+        <AlumniSearch />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8"> 
+        <div className="space-y-6">
+          <AlumniFilters />
+          
+        </div>
+        <div className="lg:col-span-3">
+          <AlumniGrid alumni={alumni} />
+        </div>     
+      </div>
       <SuggestedConnections />
     </div>
   );
 }
-
-export default AlumniPage;

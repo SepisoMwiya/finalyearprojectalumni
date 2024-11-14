@@ -8,96 +8,103 @@ import {
   Building,
   GraduationCap,
   Link as LinkIcon,
+  User,
 } from "lucide-react";
+import { db } from "@/lib/prisma";
 
-interface Alumni {
-  id: number;
-  name: string;
-  imageUrl: string;
-  graduationYear: number;
-  school: string;
-  program: string;
-  currentRole: string;
-  company: string;
-  location: string;
-  skills: string[];
-  connections: number;
+interface AlumniProps {
+  alumni: Array<{
+    id: number;
+    firstName: string;
+    lastName: string;
+    graduationYear: number;
+    school: string;
+    course: string;
+    currentCompany?: string | null;
+    jobTitle?: string | null;
+    country: string;
+    city?: string | null;
+    connectionStatus?: 'none' | 'pending' | 'connected';
+  }>;
+  currentUserId?: string;
 }
 
-const mockAlumni: Alumni[] = [
-  {
-    id: 1,
-    name: "Dr. Mulenga Kapwepwe",
-    imageUrl: "https://randomuser.me/api/portraits/women/1.jpg",
-    graduationYear: 2010,
-    school: "School of Medicine",
-    program: "Medicine & Surgery",
-    currentRole: "Chief Medical Officer",
-    company: "University Teaching Hospital",
-    location: "Lusaka, Zambia",
-    skills: ["Healthcare", "Leadership", "Research"],
-    connections: 500,
-  },
-  // Add more mock alumni...
-];
-
-export default function AlumniGrid() {
+export default function AlumniGrid({ alumni, currentUserId }: AlumniProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {mockAlumni.map((alumni) => (
-        <Card key={alumni.id} className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex gap-4">
-              <Image
-                src={alumni.imageUrl}
-                alt={alumni.name}
-                width={80}
-                height={80}
-                className="rounded-full"
-              />
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">{alumni.name}</h3>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Building className="h-4 w-4" />
-                  <span>{alumni.currentRole}</span>
+      {alumni.map((person) => (
+        <Card key={person.id} className="hover:shadow-lg transition-shadow">
+          <a href={`/alumni/${person.id}`}>
+            <CardContent className="p-6">
+              <div className="flex gap-4">
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
+                  <User className="w-10 h-10 text-gray-400" />
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="h-4 w-4" />
-                  <span>{alumni.location}</span>
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-semibold text-lg">
+                      {person.firstName} {person.lastName}
+                    </h3>
+                    {currentUserId && currentUserId !== person.id.toString() && (
+                      <div>
+                        {person.connectionStatus === 'none' && (
+                          <form action="/api/connections/request" method="POST" onClick={(e) => e.stopPropagation()}>
+                            <input type="hidden" name="toAlumniId" value={person.id} />
+                            <Button type="submit" variant="outline" size="sm">
+                              Connect
+                            </Button>
+                          </form>
+                        )}
+                        {person.connectionStatus === 'pending' && (
+                          <Button disabled variant="outline" size="sm">
+                            Pending
+                          </Button>
+                        )}
+                        {person.connectionStatus === 'connected' && (
+                          <Badge variant="outline">
+                            Connected
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {person.jobTitle && person.currentCompany && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Building className="h-4 w-4" />
+                      <span>
+                        {person.jobTitle} at {person.currentCompany}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <MapPin className="h-4 w-4" />
+                    <span>
+                      {person.city ? `${person.city}, ` : ""}{person.country}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <GraduationCap className="h-4 w-4" />
-                <span>
-                  {alumni.school} - {alumni.program} ({alumni.graduationYear})
-                </span>
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <GraduationCap className="h-4 w-4" />
+                  <span>
+                    {person.school} - {person.course} ({person.graduationYear})
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-wrap gap-2 mt-4">
-              {alumni.skills.map((skill) => (
-                <Badge key={skill} variant="secondary">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-sm text-gray-600">
-                {alumni.connections} connections
-              </span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Connect
-                </Button>
-                <Button size="sm">View Profile</Button>
+              <div className="flex justify-between items-center mt-4">
+                <div className="flex gap-2">
+                  <Button size="sm">View Profile</Button>
+                  <Button variant="outline" size="sm">
+                    <LinkIcon className="h-4 w-4 mr-2" />
+                    Connect
+                  </Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          </a>
         </Card>
       ))}
     </div>

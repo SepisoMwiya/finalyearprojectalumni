@@ -24,7 +24,7 @@ function Banner() {
             <Link href="/donate">Make A Donation</Link>
           </Button>
           <Button className="rounded-sm bg-white text-primary font-bold hover:bg-secondary hover:text-white">
-            <Link href="/sign-up">Join The Network</Link>
+            <Link href="/register">Join The Network</Link>
           </Button>
         </div>
       </div>

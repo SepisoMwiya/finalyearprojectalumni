@@ -42,4 +42,21 @@ enum ProjectStatus {
   COMPLETED
 }
 
-
+model Alumni {
+  id              Int       @id @default(autoincrement())
+  firstName       String    @db.VarChar(100)
+  lastName        String    @db.VarChar(100)
+  email           String    @unique @db.VarChar(255)
+  graduationYear  Int
+  course          String    @db.VarChar(255)
+  school          String    @db.VarChar(255)
+  currentCompany  String?   @db.VarChar(255)
+  jobTitle        String?   @db.VarChar(255)
+  country         String    @db.VarChar(100)
+  city            String?   @db.VarChar(100)
+  bio             String?   @db.Text
+  linkedInUrl     String?   @db.VarChar(255)
+  profileImage    String?   @db.VarChar(255)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
