@@ -19,6 +19,7 @@ model Project {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   categories  ProjectCategoryRelation[]
+  alumni      Alumni[]          @relation("AlumniProjects")
 }
 
 model ProjectCategory {
@@ -43,20 +44,124 @@ enum ProjectStatus {
 }
 
 model Alumni {
-  id              Int       @id @default(autoincrement())
-  firstName       String    @db.VarChar(100)
-  lastName        String    @db.VarChar(100)
-  email           String    @unique @db.VarChar(255)
+  id              Int           @id @default(autoincrement())
+  firstName       String        @db.VarChar(100)
+  lastName        String        @db.VarChar(100)
+  email           String        @unique @db.VarChar(255)
   graduationYear  Int
-  course          String    @db.VarChar(255)
-  school          String    @db.VarChar(255)
-  currentCompany  String?   @db.VarChar(255)
-  jobTitle        String?   @db.VarChar(255)
-  country         String    @db.VarChar(100)
-  city            String?   @db.VarChar(100)
-  bio             String?   @db.Text
-  linkedInUrl     String?   @db.VarChar(255)
-  profileImage    String?   @db.VarChar(255)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  course          String        @db.VarChar(255)
+  school          String        @db.VarChar(255)
+  currentCompany  String?       @db.VarChar(255)
+  jobTitle        String?       @db.VarChar(255)
+  country         String        @db.VarChar(100)
+  city            String?       @db.VarChar(100)
+  bio             String?       @db.Text
+  linkedInUrl     String?       @db.VarChar(255)
+  profileImage    String?       @db.VarChar(255)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  experiences     Experience[]
+  skills          Skill[]
+  achievements    Achievement[]
+  sentConnections Connection[] @relation("SentConnections")
+  receivedConnections Connection[] @relation("ReceivedConnections")
+  posts           Post[]
+  projects        Project[]       @relation("AlumniProjects")
+  likes           Like[]          @relation("AlumniLikes")
+  comments        Comment[]       @relation("AlumniComments")
+}
+
+model Experience {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  company     String    @db.VarChar(255)
+  location    String?   @db.VarChar(255)
+  startDate   DateTime
+  endDate     DateTime?
+  current     Boolean   @default(false)
+  description String?   @db.Text
+  alumniId    Int
+  alumni      Alumni    @relation(fields: [alumniId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([alumniId])
+}
+
+model Skill {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  alumniId  Int
+  alumni    Alumni    @relation(fields: [alumniId], references: [id])
+  createdAt DateTime  @default(now())
+
+  @@index([alumniId])
+}
+
+model Achievement {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  date        DateTime
+  alumniId    Int
+  alumni      Alumni    @relation(fields: [alumniId], references: [id])
+  createdAt   DateTime  @default(now())
+
+  @@index([alumniId])
+}
+
+model Connection {
+  id            Int       @id @default(autoincrement())
+  fromAlumniId  Int
+  toAlumniId    Int
+  status        String    @default("pending")
+  fromAlumni    Alumni    @relation("SentConnections", fields: [fromAlumniId], references: [id])
+  toAlumni      Alumni    @relation("ReceivedConnections", fields: [toAlumniId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([fromAlumniId, toAlumniId])
+  @@index([fromAlumniId])
+  @@index([toAlumniId])
+}
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  content   String    @db.Text
+  alumniId  Int
+  alumni    Alumni    @relation(fields: [alumniId], references: [id], onDelete: Cascade)
+  likes     Like[]
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([alumniId])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  alumniId  Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  alumni    Alumni   @relation("AlumniLikes", fields: [alumniId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, alumniId])
+  @@index([postId])
+  @@index([alumniId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
+  postId    Int
+  alumniId  Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  alumni    Alumni   @relation("AlumniComments", fields: [alumniId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([alumniId])
 }
