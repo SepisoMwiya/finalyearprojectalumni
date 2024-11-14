@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,7 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "../ui/toaster";
 import { useToast } from "@/hooks/use-toast";
-
+import { useUser } from "@clerk/nextjs";
+import { useSignIn } from "@clerk/nextjs";
+import AuthPromptModal from "../modals/auth-prompt-modal";
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -34,11 +36,12 @@ const formSchema = z.object({
   linkedInUrl: z.string().url().optional().or(z.literal("")),
 });
 
-
 export default function AlumniRegistrationForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const { isSignedIn, user } = useUser();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,7 +61,24 @@ export default function AlumniRegistrationForm() {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      form.setValue("firstName", user.firstName ?? "", {
+        shouldValidate: true,
+      });
+      form.setValue("lastName", user.lastName ?? "", { shouldValidate: true });
+      form.setValue("email", user.emailAddresses[0]?.emailAddress ?? "", {
+        shouldValidate: true,
+      });
+    }
+  }, [user, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!isSignedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       setIsLoading(true);
       const response = await fetch("/api/alumni/register", {
@@ -72,7 +92,7 @@ export default function AlumniRegistrationForm() {
       if (!response.ok) {
         throw new Error("Registration failed");
       }
-  
+
       toast({
         title: "Registration successful!",
         description: "Welcome to the UNZA Alumni Network!",
@@ -81,7 +101,6 @@ export default function AlumniRegistrationForm() {
       router.push("/alumni");
       router.refresh();
     } catch (error) {
-     
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -94,6 +113,10 @@ export default function AlumniRegistrationForm() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
+      <AuthPromptModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
       <h1 className="text-3xl font-bold mb-6">Join the Alumni Network</h1>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -105,7 +128,11 @@ export default function AlumniRegistrationForm() {
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input
+                      placeholder="John"
+                      {...field}
+                      disabled={isSignedIn}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +145,7 @@ export default function AlumniRegistrationForm() {
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input placeholder="Doe" {...field} disabled={isSignedIn} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,7 +160,11 @@ export default function AlumniRegistrationForm() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="john.doe@example.com" {...field} />
+                  <Input
+                    placeholder="john.doe@example.com"
+                    {...field}
+                    disabled={isSignedIn}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,9 +1,15 @@
 import { authMiddleware } from "@clerk/nextjs/server";
 
 export default authMiddleware({
-  // Remove any publicRoutes configuration to allow access to all routes
-  // Add this line to make Clerk add user information to the request, but not enforce authentication
-  ignoredRoutes: ["/(.*)", "/api/(.*)"],
+  publicRoutes: ["/", "/sign-in(.*)"],
+  afterAuth(auth, req, evt) {
+    // Handle auth state
+    if (!auth.userId && !auth.isPublicRoute) {
+      const signInUrl = new URL("/sign-in", req.url);
+      signInUrl.searchParams.set("redirect_url", req.url);
+      return Response.redirect(signInUrl);
+    }
+  },
 });
 
 export const config = {
