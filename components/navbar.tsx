@@ -14,6 +14,7 @@ import { useState } from "react";
 import LoadingOverlay from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
+import NotificationsDropdown from "./notifications/notifications-dropdown";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,11 +52,14 @@ function Navbar() {
               className="h-8 rounded-sm flex-grow md:w-auto"
             />
             {isSignedIn ? (
-              <UserButton
-                afterSignOutUrl="/"
-                showName
-                appearance={{ elements: { userButtonBox: "text-white" } }}
-              />
+              <>
+                <NotificationsDropdown />
+                <UserButton
+                  afterSignOutUrl="/"
+                  showName
+                  appearance={{ elements: { userButtonBox: "text-white" } }}
+                />
+              </>
             ) : (
               <Button
                 className="h-8 bg-secondary font-bold rounded-sm hover:bg-white hover:text-primary"

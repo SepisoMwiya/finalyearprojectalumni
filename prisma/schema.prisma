@@ -70,6 +70,8 @@ model Alumni {
   projects        Project[]       @relation("AlumniProjects")
   likes           Like[]          @relation("AlumniLikes")
   comments        Comment[]       @relation("AlumniComments")
+  sentNotifications     Notification[] @relation("sentNotifications")
+  receivedNotifications Notification[] @relation("receivedNotifications")
 }
 
 model Experience {
@@ -164,4 +166,16 @@ model Comment {
 
   @@index([postId])
   @@index([alumniId])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String   // e.g., "CONNECTION_REQUEST"
+  message   String
+  read      Boolean  @default(false)
+  toAlumniId Int
+  fromAlumniId Int
+  createdAt DateTime @default(now())
+  toAlumni   Alumni  @relation("receivedNotifications", fields: [toAlumniId], references: [id])
+  fromAlumni Alumni  @relation("sentNotifications", fields: [fromAlumniId], references: [id])
 }

@@ -18,9 +18,9 @@ import { Card, CardContent } from "@/components/ui/card";
 async function getAlumniStats() {
   const totalAlumni = await db.alumni.count();
   const countries = await db.alumni.groupBy({
-    by: ['country'],
+    by: ["country"],
   });
-  
+
   return {
     totalAlumni,
     totalCountries: countries.length,
@@ -44,9 +44,32 @@ async function getAlumni(searchQuery?: string, currentUserId?: string) {
   const alumni = await db.alumni.findMany({
     where: whereClause,
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
+    },
+    include: {
+      sentConnections: true,
+      receivedConnections: true,
     },
   });
+
+  // If there's a current user, determine connection status for each alumni
+  if (currentUserId) {
+    return alumni.map((person) => {
+      const sentConnection = person.sentConnections.find(
+        (conn) => conn.toAlumniId.toString() === currentUserId
+      );
+      const receivedConnection = person.receivedConnections.find(
+        (conn) => conn.fromAlumniId.toString() === currentUserId
+      );
+
+      const connection = sentConnection || receivedConnection;
+
+      return {
+        ...person,
+        connectionStatus: connection ? connection.status : "none",
+      };
+    });
+  }
 
   return alumni;
 }
@@ -130,14 +153,13 @@ export default async function AlumniPage({
         <AlumniSearch />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8"> 
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="space-y-6">
           <AlumniFilters />
-          
         </div>
         <div className="lg:col-span-3">
           <AlumniGrid alumni={alumni} />
-        </div>     
+        </div>
       </div>
       <SuggestedConnections />
     </div>

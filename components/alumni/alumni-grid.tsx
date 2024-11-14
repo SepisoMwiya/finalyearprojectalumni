@@ -11,6 +11,7 @@ import {
   User,
 } from "lucide-react";
 import { db } from "@/lib/prisma";
+import { toast, useToast } from "@/hooks/use-toast";
 
 interface AlumniProps {
   alumni: Array<{
@@ -24,12 +25,44 @@ interface AlumniProps {
     jobTitle?: string | null;
     country: string;
     city?: string | null;
-    connectionStatus?: 'none' | 'pending' | 'connected';
+    connectionStatus?: "none" | "pending" | "connected";
   }>;
   currentUserId?: string;
 }
 
 export default function AlumniGrid({ alumni, currentUserId }: AlumniProps) {
+  const handleConnect = async (
+    e: React.FormEvent<HTMLFormElement>,
+    alumniId: number
+  ) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("/api/connections/request", {
+        method: "POST",
+        body: new FormData(e.currentTarget),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send connection request");
+      }
+
+      toast({
+        title: "Connection request sent",
+        description: "Your connection request has been sent successfully.",
+      });
+
+      // Refresh the page to update the connection status
+      window.location.reload();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send connection request. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {alumni.map((person) => (
@@ -45,28 +78,35 @@ export default function AlumniGrid({ alumni, currentUserId }: AlumniProps) {
                     <h3 className="font-semibold text-lg">
                       {person.firstName} {person.lastName}
                     </h3>
-                    {currentUserId && currentUserId !== person.id.toString() && (
-                      <div>
-                        {person.connectionStatus === 'none' && (
-                          <form action="/api/connections/request" method="POST" onClick={(e) => e.stopPropagation()}>
-                            <input type="hidden" name="toAlumniId" value={person.id} />
-                            <Button type="submit" variant="outline" size="sm">
-                              Connect
+                    {currentUserId &&
+                      currentUserId !== person.id.toString() && (
+                        <div>
+                          {person.connectionStatus === "none" && (
+                            <form
+                              action="/api/connections/request"
+                              method="POST"
+                              onSubmit={(e) => handleConnect(e, person.id)}
+                            >
+                              <input
+                                type="hidden"
+                                name="toAlumniId"
+                                value={person.id}
+                              />
+                              <Button type="submit" variant="outline" size="sm">
+                                Connect
+                              </Button>
+                            </form>
+                          )}
+                          {person.connectionStatus === "pending" && (
+                            <Button disabled variant="outline" size="sm">
+                              Pending
                             </Button>
-                          </form>
-                        )}
-                        {person.connectionStatus === 'pending' && (
-                          <Button disabled variant="outline" size="sm">
-                            Pending
-                          </Button>
-                        )}
-                        {person.connectionStatus === 'connected' && (
-                          <Badge variant="outline">
-                            Connected
-                          </Badge>
-                        )}
-                      </div>
-                    )}
+                          )}
+                          {person.connectionStatus === "connected" && (
+                            <Badge variant="outline">Connected</Badge>
+                          )}
+                        </div>
+                      )}
                   </div>
                   {person.jobTitle && person.currentCompany && (
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -79,7 +119,8 @@ export default function AlumniGrid({ alumni, currentUserId }: AlumniProps) {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <MapPin className="h-4 w-4" />
                     <span>
-                      {person.city ? `${person.city}, ` : ""}{person.country}
+                      {person.city ? `${person.city}, ` : ""}
+                      {person.country}
                     </span>
                   </div>
                 </div>
