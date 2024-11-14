@@ -2,8 +2,8 @@ import { db } from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import ProfileHeader from "@/components/alumni/profile/profile-header";
-import ProfileTabs from "@/components/alumni/profile/profile-tabs";
 import ProfileSidebar from "@/components/alumni/profile/profile-sidebar";
+import ProfileTabs from "@/components/alumni/profile/profile-tabs";
 
 interface ProfilePageProps {
   params: {
@@ -16,6 +16,11 @@ async function getAlumniProfile(id: string) {
     where: { id: parseInt(id) },
     include: {
       skills: true,
+      experiences: {
+        orderBy: {
+          startDate: "desc",
+        },
+      },
       achievements: {
         orderBy: {
           date: "desc",

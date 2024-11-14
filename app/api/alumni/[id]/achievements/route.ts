@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 
-const experienceSchema = z.object({
+const achievementSchema = z.object({
   title: z.string().min(2),
-  company: z.string().min(2),
-  location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
   description: z.string().optional(),
-  current: z.boolean().default(false),
+  date: z.string(),
 });
 
 export async function POST(
@@ -33,38 +29,21 @@ export async function POST(
     }
 
     const body = await req.json();
-    const validatedData = experienceSchema.parse(body);
+    const validatedData = achievementSchema.parse(body);
 
-    const experience = await db.experience.create({
+    const achievement = await db.achievement.create({
       data: {
         ...validatedData,
-        startDate: new Date(validatedData.startDate),
-        endDate: validatedData.endDate ? new Date(validatedData.endDate) : null,
+        date: new Date(validatedData.date),
         alumniId: parseInt(params.id),
       },
     });
 
-    return NextResponse.json(experience);
+    return NextResponse.json(achievement);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return new NextResponse(JSON.stringify(error.errors), { status: 400 });
     }
-    return new NextResponse("Internal Server Error", { status: 500 });
-  }
-}
-
-export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const experiences = await db.experience.findMany({
-      where: { alumniId: parseInt(params.id) },
-      orderBy: { startDate: "desc" },
-    });
-
-    return NextResponse.json(experiences);
-  } catch (error) {
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

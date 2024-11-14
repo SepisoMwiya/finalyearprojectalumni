@@ -25,27 +25,23 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
-  company: z.string().min(2, "Company must be at least 2 characters"),
-  location: z.string().optional(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
   description: z.string().optional(),
-  current: z.boolean().default(false),
+  date: z.string(),
 });
 
-interface AddExperienceModalProps {
+interface AddAchievementModalProps {
   isOpen: boolean;
   onClose: () => void;
   alumniId: number;
-  onExperienceAdded: () => void;
+  onAchievementAdded: () => void;
 }
 
-export default function AddExperienceModal({
+export default function AddAchievementModal({
   isOpen,
   onClose,
   alumniId,
-  onExperienceAdded,
-}: AddExperienceModalProps) {
+  onAchievementAdded,
+}: AddAchievementModalProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -53,19 +49,15 @@ export default function AddExperienceModal({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
-      company: "",
-      location: "",
-      startDate: "",
-      endDate: "",
       description: "",
-      current: false,
+      date: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/alumni/${alumniId}/experience`, {
+      const response = await fetch(`/api/alumni/${alumniId}/achievements`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,21 +66,21 @@ export default function AddExperienceModal({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add experience");
+        throw new Error("Failed to add achievement");
       }
 
       toast({
-        title: "Experience added",
+        title: "Achievement added",
         description:
-          "Your experience has been successfully added to your profile.",
+          "Your achievement has been successfully added to your profile.",
       });
-      onExperienceAdded();
+      onAchievementAdded();
       onClose();
       form.reset();
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add experience. Please try again.",
+        description: "Failed to add achievement. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -100,7 +92,7 @@ export default function AddExperienceModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Experience</DialogTitle>
+          <DialogTitle>Add Achievement</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -111,7 +103,7 @@ export default function AddExperienceModal({
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Software Engineer" {...field} />
+                    <Input placeholder="e.g., Best Graduate Award" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,51 +112,17 @@ export default function AddExperienceModal({
 
             <FormField
               control={form.control}
-              name="company"
+              name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Company</FormLabel>
+                  <FormLabel>Date</FormLabel>
                   <FormControl>
-                    <Input placeholder="Company Name" {...field} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="endDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Date</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="date"
-                        {...field}
-                        disabled={form.watch("current")}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <FormField
               control={form.control}
@@ -174,7 +132,7 @@ export default function AddExperienceModal({
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe your role and responsibilities..."
+                      placeholder="Describe your achievement..."
                       {...field}
                     />
                   </FormControl>
@@ -184,7 +142,7 @@ export default function AddExperienceModal({
             />
 
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Experience"}
+              {isLoading ? "Adding..." : "Add Achievement"}
             </Button>
           </form>
         </Form>
