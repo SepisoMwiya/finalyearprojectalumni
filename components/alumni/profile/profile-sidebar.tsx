@@ -1,23 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Users,
-  Mail,
-  Linkedin,
-  Award,
-  BookOpen,
-  Briefcase,
-  GraduationCap,
-  MapPin,
-} from "lucide-react";
-import { Alumni } from "@prisma/client";
-import Link from "next/link";
+import { Users, Mail, Linkedin, Award, BookOpen, MapPin } from "lucide-react";
+import { Alumni, Skill, Achievement } from "@prisma/client";
+import AddSkillModal from "./add-skill-modal";
+import { useRouter } from "next/navigation";
 
 interface ProfileSidebarProps {
-  profile: Alumni;
+  profile: Alumni & {
+    skills: Skill[];
+    achievements: Achievement[];
+    connections: any[];
+  };
   isOwnProfile: boolean;
 }
 
@@ -25,19 +22,12 @@ export default function ProfileSidebar({
   profile,
   isOwnProfile,
 }: ProfileSidebarProps) {
-  const achievements = [
-    "Dean's List 2020",
-    "Research Excellence Award",
-    "Student Leadership Award",
-  ];
+  const router = useRouter();
+  const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
 
-  const skills = [
-    "Leadership",
-    "Project Management",
-    "Research",
-    "Public Speaking",
-    "Data Analysis",
-  ];
+  const handleSkillAdded = () => {
+    router.refresh();
+  };
 
   return (
     <div className="space-y-6">
@@ -91,14 +81,19 @@ export default function ProfileSidebar({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {skills.map((skill) => (
-              <Badge key={skill} variant="secondary">
-                {skill}
+            {profile.skills.map((skill) => (
+              <Badge key={skill.id} variant="secondary">
+                {skill.name}
               </Badge>
             ))}
           </div>
           {isOwnProfile && (
-            <Button variant="ghost" size="sm" className="mt-4 w-full">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-4 w-full"
+              onClick={() => setIsAddSkillModalOpen(true)}
+            >
               Add Skills
             </Button>
           )}
@@ -115,10 +110,13 @@ export default function ProfileSidebar({
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {achievements.map((achievement) => (
-              <li key={achievement} className="text-sm flex items-center gap-2">
+            {profile.achievements.map((achievement) => (
+              <li
+                key={achievement.id}
+                className="text-sm flex items-center gap-2"
+              >
                 <span className="w-2 h-2 bg-green-500 rounded-full" />
-                {achievement}
+                {achievement.title}
               </li>
             ))}
           </ul>
@@ -148,15 +146,37 @@ export default function ProfileSidebar({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">School Mates</span>
-              <span className="font-semibold">45</span>
+              <span className="font-semibold">
+                {
+                  profile.connections.filter(
+                    (conn) => conn.alumni.school === profile.school
+                  ).length
+                }
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Same Industry</span>
-              <span className="font-semibold">28</span>
+              <span className="font-semibold">
+                {
+                  profile.connections.filter(
+                    (conn) =>
+                      conn.alumni.currentCompany &&
+                      profile.currentCompany &&
+                      conn.alumni.currentCompany === profile.currentCompany
+                  ).length
+                }
+              </span>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      <AddSkillModal
+        isOpen={isAddSkillModalOpen}
+        onClose={() => setIsAddSkillModalOpen(false)}
+        alumniId={profile.id}
+        onSkillAdded={handleSkillAdded}
+      />
     </div>
   );
 }
