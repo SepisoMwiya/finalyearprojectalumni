@@ -1,9 +1,35 @@
 const { PrismaClient, ProjectStatus } = require("@prisma/client");
-// Initialize PrismaClient
 const prisma = new PrismaClient();
 
 async function main() {
-  // Use the existing PrismaClient instance
+  console.log("Starting to seed categories...");
+
+  // Create categories first
+  const categories = [
+    "Technology",
+    "Education",
+    "Agriculture",
+    "Environment",
+    "Energy",
+    "Culture",
+    "Conservation",
+    "Business",
+    "Event", // Added Event category since it's used in one of the projects
+  ];
+
+  // Create categories and store the results
+  for (const categoryName of categories) {
+    await prisma.projectCategory.upsert({
+      where: { name: categoryName },
+      update: {},
+      create: { name: categoryName },
+    });
+  }
+
+  console.log("Categories seeded successfully!");
+  console.log("Starting to seed projects...");
+
+  // Rest of your existing sampleProjects array
   const sampleProjects = [
     {
       title: "UNZA Library Digitization Project",
@@ -135,36 +161,23 @@ async function main() {
     },
   ];
 
-  // Ensure all categories exist
-  const categories = [
-    "Technology",
-    "Education",
-    "Agriculture",
-    "Environment",
-    "Energy",
-    "Culture",
-    "Conservation",
-    "Business",
-  ];
-
-  await prisma?.projectCategory.createMany({
-    data: categories.map((name) => ({ name })),
-    skipDuplicates: true,
-  });
-
   // Create all projects
   for (const project of sampleProjects) {
-    const createdProject = await prisma?.project.create({
-      data: project,
-      include: {
-        categories: {
-          include: {
-            category: true,
+    try {
+      const createdProject = await prisma.project.create({
+        data: project,
+        include: {
+          categories: {
+            include: {
+              category: true,
+            },
           },
         },
-      },
-    });
-    console.log("Project created:", createdProject.title);
+      });
+      console.log(`Created project: ${createdProject.title}`);
+    } catch (error) {
+      console.error(`Failed to create project: ${project.title}`, error);
+    }
   }
 
   console.log("All sample projects have been created.");

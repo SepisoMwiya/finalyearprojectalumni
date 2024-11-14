@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node scripts/seed-project.ts"
+    "seed": "ts-node scripts/cleanup-duplicates.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^5.6.3",
