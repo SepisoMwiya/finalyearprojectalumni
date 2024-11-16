@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { useConnection } from "@/hooks/use-connection";
+import { Badge } from "@/components/ui/badge";
+
+const statuses = ["none", "pending", "connected"] as const;
 
 interface ConnectionButtonProps {
   profileId: number;
-  connectionStatus: "none" | "pending" | "connected";
+  connectionStatus: (typeof statuses)[number];
   isOwnProfile: boolean;
 }
 
@@ -22,17 +25,20 @@ export default function ConnectionButton({
     sendConnectionRequest(profileId);
   };
 
-  return (
-    <Button
-      onClick={handleClick}
-      disabled={isLoading || connectionStatus !== "none"}
-      variant={connectionStatus === "none" ? "default" : "outline"}
-    >
-      {isLoading
-        ? "Sending..."
-        : connectionStatus === "pending"
-        ? "Pending"
-        : "Connect"}
-    </Button>
-  );
-} 
+  switch (connectionStatus) {
+    case "connected":
+      return <Badge variant="outline">Connected</Badge>;
+    case "pending":
+      return (
+        <Button disabled variant="outline">
+          Pending
+        </Button>
+      );
+    default:
+      return (
+        <Button onClick={handleClick} disabled={isLoading} variant="default">
+          {isLoading ? "Sending..." : "Connect"}
+        </Button>
+      );
+  }
+}

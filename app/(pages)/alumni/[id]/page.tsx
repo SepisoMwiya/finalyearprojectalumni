@@ -97,6 +97,27 @@ async function getAlumniProfile(id: string) {
   };
 }
 
+async function getConnectionStatus(profileId: string, currentUserId?: string) {
+  if (!currentUserId) return "none";
+
+  const connection = await db.connection.findFirst({
+    where: {
+      OR: [
+        {
+          fromAlumniId: parseInt(currentUserId),
+          toAlumniId: parseInt(profileId),
+        },
+        {
+          fromAlumniId: parseInt(profileId),
+          toAlumniId: parseInt(currentUserId),
+        },
+      ],
+    },
+  });
+
+  return connection ? connection.status : "none";
+}
+
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const user = await currentUser();
   const profile = await getAlumniProfile(params.id);
@@ -107,6 +128,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const isOwnProfile = user?.emailAddresses[0]?.emailAddress === profile.email;
   const currentUserId = isOwnProfile ? params.id : undefined;
+  
+  const connectionStatus = await getConnectionStatus(params.id, currentUserId);
 
   return (
     <div className="container py-8">
@@ -116,6 +139,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             profile={profile}
             isOwnProfile={isOwnProfile}
             currentUserId={currentUserId}
+            connectionStatus={connectionStatus}
           />
           <ProfileTabs profile={profile} isOwnProfile={isOwnProfile} />
         </div>

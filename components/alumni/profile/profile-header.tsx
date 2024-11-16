@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +9,17 @@ import { Edit, MapPin, Building, Mail, Linkedin, Globe } from "lucide-react";
 import { Alumni } from "@prisma/client";
 import EditProfileModal from "./edit-profile-modal";
 import { toast } from "@/hooks/use-toast";
-import { useRouter } from "next/dist/client/components/navigation";
+import { useParams, useRouter } from "next/dist/client/components/navigation";
 import ConnectionButton from "./connection-button";
+import { db } from "@/lib/prisma";
 
 interface ProfileHeaderProps {
   profile: Alumni & {
-    connections: Array<{
+    receivedConnections: Array<{
       id: number;
       status: "pending" | "connected";
+      fromAlumniId: number;
+      toAlumniId: number;
       alumni: {
         id: number;
         firstName: string;
@@ -28,19 +31,36 @@ interface ProfileHeaderProps {
   currentUserId?: string;
 }
 
+interface ProfileHeaderProps {
+  profile: Alumni & {
+    receivedConnections: Array<{
+      id: number;
+      status: "pending" | "connected";
+      fromAlumniId: number;
+      toAlumniId: number;
+      alumni: {
+        id: number;
+        firstName: string;
+        lastName: string;
+      };
+    }>;
+  };
+  isOwnProfile: boolean;
+  currentUserId?: string;
+  connectionStatus: "none" | "pending" | "connected";
+}
+
 export default function ProfileHeader({
   profile,
   isOwnProfile,
   currentUserId,
+  connectionStatus,
 }: ProfileHeaderProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const router = useRouter();
 
-  const connectionStatus =
-    profile.connections.find(
-      (conn) => conn.alumni.id.toString() === currentUserId
-    )?.status || "none";
+  const params = useParams();
 
   const handleConnect = async () => {
     if (!currentUserId) {
@@ -89,24 +109,13 @@ export default function ProfileHeader({
       );
     }
 
-    switch (connectionStatus) {
-      case "pending":
-        return (
-          <Button disabled variant="outline">
-            Pending
-          </Button>
-        );
-      case "connected":
-        return <Badge variant="outline">Connected</Badge>;
-      default:
-        return (
-          <ConnectionButton
-            profileId={profile.id}
-            connectionStatus={connectionStatus}
-            isOwnProfile={isOwnProfile}
-          />
-        );
-    }
+    return (
+      <ConnectionButton
+        profileId={profile.id}
+        connectionStatus={connectionStatus}
+        isOwnProfile={isOwnProfile}
+      />
+    );
   };
 
   return (
