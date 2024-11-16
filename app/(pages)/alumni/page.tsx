@@ -28,19 +28,76 @@ async function getAlumniStats() {
   };
 }
 
-async function getAlumni(searchQuery?: string, currentUserId?: string) {
-  const whereClause = searchQuery
-    ? {
-        OR: [
-          { firstName: { contains: searchQuery } },
-          { lastName: { contains: searchQuery } },
-          { currentCompany: { contains: searchQuery } },
-          { school: { contains: searchQuery } },
-          { country: { contains: searchQuery } },
-          { city: { contains: searchQuery } },
-        ],
+async function getAlumni(
+  searchQuery?: string,
+  currentUserId?: string,
+  filters?: {
+    schools?: string[];
+    years?: string[];
+    locations?: string[];
+  }
+) {
+  const whereClause: any = {};
+
+  // Handle search query
+  if (searchQuery) {
+    whereClause.OR = [
+      { firstName: { contains: searchQuery } },
+      { lastName: { contains: searchQuery } },
+      { currentCompany: { contains: searchQuery } },
+      { school: { contains: searchQuery } },
+      { country: { contains: searchQuery } },
+      { city: { contains: searchQuery } },
+    ];
+  }
+
+  // Handle filters
+  if (filters) {
+    const conditions: any[] = [];
+
+    if (filters.schools?.length) {
+      conditions.push({
+        school: { in: filters.schools },
+      });
+    }
+
+    if (filters.years?.length) {
+      // Handle graduation year ranges
+      const yearRanges = filters.years
+        .map((range) => {
+          switch (range) {
+            case "2020-2024":
+              return { graduationYear: { gte: 2020, lte: 2024 } };
+            case "2015-2019":
+              return { graduationYear: { gte: 2015, lte: 2019 } };
+            case "2010-2014":
+              return { graduationYear: { gte: 2010, lte: 2014 } };
+            case "Before 2010":
+              return { graduationYear: { lt: 2010 } };
+            default:
+              return null;
+          }
+        })
+        .filter(Boolean);
+
+      if (yearRanges.length) {
+        conditions.push({ OR: yearRanges });
       }
-    : {};
+    }
+
+    if (filters.locations?.length) {
+      conditions.push({
+        OR: [
+          { city: { in: filters.locations } },
+          { country: { in: filters.locations } },
+        ],
+      });
+    }
+
+    if (conditions.length > 0) {
+      whereClause.AND = conditions;
+    }
+  }
 
   const alumni = await db.alumni.findMany({
     where: whereClause,
@@ -78,7 +135,7 @@ async function getAlumni(searchQuery?: string, currentUserId?: string) {
 export default async function AlumniPage({
   searchParams,
 }: {
-  searchParams: { q?: string };
+  searchParams: { q?: string; schools?: string; years?: string; locations?: string };
 }) {
   const { userId } = auth();
   const { totalAlumni, totalCountries } = await getAlumniStats();
@@ -94,7 +151,14 @@ export default async function AlumniPage({
     }
   }
 
-  const alumni = await getAlumni(searchParams.q, currentAlumniId);
+  // Parse filter parameters
+  const filters = {
+    schools: searchParams.schools?.split(","),
+    years: searchParams.years?.split(","),
+    locations: searchParams.locations?.split(","),
+  };
+
+  const alumni = await getAlumni(searchParams.q, currentAlumniId, filters);
 
   const stats = [
     {
