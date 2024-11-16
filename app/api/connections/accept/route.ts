@@ -9,47 +9,57 @@ export async function POST(req: Request) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await req.json();
-    const { fromAlumniId } = body;
+    const { fromAlumniId } = await req.json();
+    if (!fromAlumniId) {
+      return new NextResponse("Missing fromAlumniId", { status: 400 });
+    }
 
     const toAlumni = await db.alumni.findFirst({
-      where: {
-        email: userId,
-      },
+      where: { email: userId },
     });
 
     if (!toAlumni) {
       return new NextResponse("Alumni not found", { status: 404 });
     }
 
-    // Update connection status
-    await db.connection.updateMany({
-      where: {
-        fromAlumniId: fromAlumniId,
-        toAlumniId: toAlumni.id,
-        status: "pending",
-      },
-      data: {
-        status: "connected",
-      },
-    });
+    // Update connection and notification in a transaction
+    await db.$transaction(async (tx) => {
+      // Update connection status
+      const connection = await tx.connection.updateMany({
+        where: {
+          fromAlumniId: parseInt(fromAlumniId),
+          toAlumniId: toAlumni.id,
+          status: "pending",
+        },
+        data: {
+          status: "connected",
+        },
+      });
 
-    // Mark notification as read
-    await db.notification.updateMany({
-      where: {
-        fromAlumniId: fromAlumniId,
-        toAlumniId: toAlumni.id,
-        type: "CONNECTION_REQUEST",
-        read: false,
-      },
-      data: {
-        read: true,
-      },
+      if (connection.count === 0) {
+        throw new Error("Connection not found or already accepted");
+      }
+
+      // Mark notification as read
+      await tx.notification.updateMany({
+        where: {
+          fromAlumniId: parseInt(fromAlumniId),
+          toAlumniId: toAlumni.id,
+          type: "CONNECTION_REQUEST",
+          read: false,
+        },
+        data: {
+          read: true,
+        },
+      });
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[CONNECTION_ACCEPT]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse(
+      error instanceof Error ? error.message : "Internal error",
+      { status: 500 }
+    );
   }
 } 

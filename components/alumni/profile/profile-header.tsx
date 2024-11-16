@@ -8,17 +8,106 @@ import { Edit, MapPin, Building, Mail, Linkedin, Globe } from "lucide-react";
 
 import { Alumni } from "@prisma/client";
 import EditProfileModal from "./edit-profile-modal";
+import { toast } from "@/hooks/use-toast";
+import { useRouter } from "next/dist/client/components/navigation";
+import ConnectionButton from "./connection-button";
 
 interface ProfileHeaderProps {
-  profile: Alumni;
+  profile: Alumni & {
+    connections: Array<{
+      id: number;
+      status: "pending" | "connected";
+      alumni: {
+        id: number;
+        firstName: string;
+        lastName: string;
+      };
+    }>;
+  };
   isOwnProfile: boolean;
+  currentUserId?: string;
 }
 
 export default function ProfileHeader({
   profile,
   isOwnProfile,
+  currentUserId,
 }: ProfileHeaderProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const router = useRouter();
+
+  const connectionStatus =
+    profile.connections.find(
+      (conn) => conn.alumni.id.toString() === currentUserId
+    )?.status || "none";
+
+  const handleConnect = async () => {
+    if (!currentUserId) {
+      toast({
+        title: "Please sign in to connect with alumni",
+      });
+      return;
+    }
+
+    try {
+      setIsConnecting(true);
+      const response = await fetch("/api/connections/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ toAlumniId: profile.id }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast({
+        title: "Connection request sent successfully",
+      });
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Failed to send connection request",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to send connection request",
+      });
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const renderConnectionButton = () => {
+    if (isOwnProfile) {
+      return (
+        <Button onClick={() => setIsEditModalOpen(true)}>Edit Profile</Button>
+      );
+    }
+
+    switch (connectionStatus) {
+      case "pending":
+        return (
+          <Button disabled variant="outline">
+            Pending
+          </Button>
+        );
+      case "connected":
+        return <Badge variant="outline">Connected</Badge>;
+      default:
+        return (
+          <ConnectionButton
+            profileId={profile.id}
+            connectionStatus={connectionStatus}
+            isOwnProfile={isOwnProfile}
+          />
+        );
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -64,13 +153,7 @@ export default function ProfileHeader({
               </div>
             </div>
 
-            {isOwnProfile ? (
-              <Button onClick={() => setIsEditModalOpen(true)}>
-                Edit Profile
-              </Button>
-            ) : (
-              <Button>Connect</Button>
-            )}
+            {renderConnectionButton()}
           </div>
 
           <div className="mt-4">

@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function GET(req: Request) {
   try {
-    const { userId } = auth();
-    if (!userId) {
+    const user = await currentUser();
+    if (!user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
+    const userEmail = user.emailAddresses[0].emailAddress;
+
     const alumni = await db.alumni.findFirst({
       where: {
-        email: userId,
+        email: userEmail,
       },
     });
 

@@ -14,6 +14,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { auth } from "@clerk/nextjs/server";
 
 async function getAlumniStats() {
   const totalAlumni = await db.alumni.count();
@@ -79,8 +80,21 @@ export default async function AlumniPage({
 }: {
   searchParams: { q?: string };
 }) {
+  const { userId } = auth();
   const { totalAlumni, totalCountries } = await getAlumniStats();
-  const alumni = await getAlumni(searchParams.q);
+
+  // Get current alumni ID if user is logged in
+  let currentAlumniId: string | null = null;
+  if (userId) {
+    const currentAlumni = await db.alumni.findFirst({
+      where: { email: userId },
+    });
+    if (currentAlumni) {
+      currentAlumniId = currentAlumni.id.toString();
+    }
+  }
+
+  const alumni = await getAlumni(searchParams.q, currentAlumniId);
 
   const stats = [
     {
@@ -158,7 +172,7 @@ export default async function AlumniPage({
           <AlumniFilters />
         </div>
         <div className="lg:col-span-3">
-          <AlumniGrid alumni={alumni} />
+          <AlumniGrid alumni={alumni} currentUserId={currentAlumniId} />
         </div>
       </div>
       <SuggestedConnections />

@@ -106,12 +106,17 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   }
 
   const isOwnProfile = user?.emailAddresses[0]?.emailAddress === profile.email;
+  const currentUserId = isOwnProfile ? params.id : undefined;
 
   return (
     <div className="container py-8">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-3">
-          <ProfileHeader profile={profile} isOwnProfile={isOwnProfile} />
+          <ProfileHeader
+            profile={profile}
+            isOwnProfile={isOwnProfile}
+            currentUserId={currentUserId}
+          />
           <ProfileTabs profile={profile} isOwnProfile={isOwnProfile} />
         </div>
         <div className="lg:col-span-1">
