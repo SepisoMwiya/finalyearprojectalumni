@@ -9,18 +9,15 @@ import { School, Calendar, MapPin } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
-const schools = [
-  "School of Medicine",
-  "School of Engineering",
-  "School of Business",
-  "School of Law",
-  "School of Education",
-];
 
 const graduationYears = ["2020-2024", "2015-2019", "2010-2014", "Before 2010"];
 const locations = ["Lusaka", "Copperbelt", "International", "Other Regions"];
 
-export default function AlumniFilters() {
+interface AlumniFiltersProps {
+  schools: string[];
+}
+
+export default function AlumniFilters({ schools }: AlumniFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 

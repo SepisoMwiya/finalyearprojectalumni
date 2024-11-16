@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@clerk/nextjs/server";
+import { getSchools } from "@/lib/get-schools";
 
 async function getAlumniStats() {
   const totalAlumni = await db.alumni.count();
@@ -199,6 +200,8 @@ export default async function AlumniPage({
     },
   ];
 
+  const schools = await getSchools();
+
   return (
     <div className="container mx-auto py-8">
       <div className="text-center mb-12">
@@ -233,7 +236,7 @@ export default async function AlumniPage({
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="space-y-6">
-          <AlumniFilters />
+          <AlumniFilters schools={schools} />
         </div>
         <div className="lg:col-span-3">
           <AlumniGrid alumni={alumni} currentUserId={currentAlumniId} />
