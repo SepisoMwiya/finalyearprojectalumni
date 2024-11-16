@@ -20,6 +20,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import { useSignIn } from "@clerk/nextjs";
 import AuthPromptModal from "../modals/auth-prompt-modal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+
+interface School {
+  id: number;
+  name: string;
+  courses: Course[];
+}
+
+interface Course {
+  id: number;
+  name: string;
+  schoolId: number;
+}
 
 const formSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -42,6 +61,9 @@ export default function AlumniRegistrationForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { isSignedIn, user } = useUser();
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [schools, setSchools] = useState<School[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedSchool, setSelectedSchool] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,6 +94,22 @@ export default function AlumniRegistrationForm() {
       });
     }
   }, [user, form]);
+
+  useEffect(() => {
+    async function fetchSchools() {
+      const response = await fetch("/api/schools");
+      const data = await response.json();
+      setSchools(data);
+    }
+    fetchSchools();
+  }, []);
+
+  const handleSchoolChange = async (schoolId) => {
+    setSelectedSchool(schoolId);
+    const response = await fetch(`/api/schools/${schoolId}/courses`);
+    const data = await response.json();
+    setCourses(data);
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!isSignedIn) {
@@ -192,7 +230,35 @@ export default function AlumniRegistrationForm() {
                 <FormItem>
                   <FormLabel>School</FormLabel>
                   <FormControl>
-                    <Input placeholder="School of Engineering" {...field} />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-between"
+                          role="combobox"
+                        >
+                          {field.value
+                            ? schools.find(
+                                (school) => school.id === field.value
+                              )?.name
+                            : "Select a school"}
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full">
+                        {schools.map((school) => (
+                          <DropdownMenuItem
+                            key={school.id}
+                            onSelect={() => {
+                              field.onChange(school.id);
+                              handleSchoolChange(school.id);
+                            }}
+                          >
+                            {school.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -207,7 +273,31 @@ export default function AlumniRegistrationForm() {
               <FormItem>
                 <FormLabel>Course</FormLabel>
                 <FormControl>
-                  <Input placeholder="Computer Science" {...field} />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild disabled={!selectedSchool}>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-between"
+                        role="combobox"
+                      >
+                        {field.value
+                          ? courses.find((course) => course.id === field.value)
+                              ?.name
+                          : "Select a course"}
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-full">
+                      {courses.map((course) => (
+                        <DropdownMenuItem
+                          key={course.id}
+                          onSelect={() => field.onChange(course.id)}
+                        >
+                          {course.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </FormControl>
                 <FormMessage />
               </FormItem>

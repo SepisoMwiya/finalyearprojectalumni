@@ -179,3 +179,16 @@ model Notification {
   toAlumni   Alumni  @relation("receivedNotifications", fields: [toAlumniId], references: [id])
   fromAlumni Alumni  @relation("sentNotifications", fields: [fromAlumniId], references: [id])
 }
+
+model School {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  courses Course[]
+}
+
+model Course {
+  id      Int     @id @default(autoincrement())
+  name    String
+  school  School   @relation(fields: [schoolId], references: [id])
+  schoolId Int
+}
