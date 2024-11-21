@@ -45,8 +45,8 @@ const formSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   graduationYear: z.string().transform((val) => parseInt(val, 10)),
-  course: z.string().min(2, "Course name must be at least 2 characters"),
-  school: z.string().min(2, "School name must be at least 2 characters"),
+  course: z.number().min(1, "Please select a course"),
+  school: z.number().min(1, "Please select a school"),
   currentCompany: z.string().optional(),
   jobTitle: z.string().optional(),
   country: z.string().min(2, "Country must be at least 2 characters"),
@@ -72,8 +72,8 @@ export default function AlumniRegistrationForm() {
       lastName: "",
       email: "",
       graduationYear: "",
-      course: "",
-      school: "",
+      course: 0,
+      school: 0,
       currentCompany: "",
       jobTitle: "",
       country: "",
@@ -119,12 +119,23 @@ export default function AlumniRegistrationForm() {
 
     try {
       setIsLoading(true);
+      const selectedSchool = schools.find((s) => s.id === values.school)?.name;
+      const selectedCourse = courses.find((c) => c.id === values.course)?.name;
+
+      if (!selectedSchool || !selectedCourse) {
+        throw new Error("Invalid school or course selection");
+      }
+
       const response = await fetch("/api/alumni/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          school: selectedSchool,
+          course: selectedCourse,
+        }),
       });
 
       if (!response.ok) {
@@ -396,7 +407,11 @@ export default function AlumniRegistrationForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading}>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            onClick={form.handleSubmit(onSubmit)}
+          >
             {isLoading ? "Registering..." : "Register"}
           </Button>
         </form>
