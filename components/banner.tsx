@@ -28,7 +28,9 @@ function Banner({ isAlumni }: BannerProps) {
             variant="default"
             className="bg-red-600 rounded-sm font-bold hover:bg-secondary"
           >
-            <Link href="/donate">Make A Donation</Link>
+            <Link href="https://donate.stripe.com/test_9AQ8xQbJx4Spdu84gg">
+              Make A Donation
+            </Link>
           </Button>
           {!isAlumni && (
             <Button className="rounded-sm bg-white text-primary font-bold hover:bg-secondary hover:text-white">

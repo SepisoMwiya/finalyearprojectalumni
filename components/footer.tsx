@@ -78,7 +78,9 @@ const Footer = () => {
                 <Link href="/register">Register</Link>
               </Button>
               <Button className="bg-red-600 text-white font-bold rounded hover:bg-primary">
-                <Link href="/donate">Make A Donation</Link>
+                <Link href="https://donate.stripe.com/test_9AQ8xQbJx4Spdu84gg">
+                  Make A Donation
+                </Link>
               </Button>
             </div>
           </div>

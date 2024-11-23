@@ -70,7 +70,9 @@ function ProjectCard({
           <Button variant="outline" asChild className="mr-2">
             <Link href={readMoreLink}>Read More</Link>
           </Button>
-          <Button>Donate</Button>
+          <Link href="https://donate.stripe.com/test_9AQ8xQbJx4Spdu84gg">
+            <Button>Donate</Button>
+          </Link>
         </div>
       </CardFooter>
     </Card>

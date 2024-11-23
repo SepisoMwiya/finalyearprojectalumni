@@ -62,13 +62,12 @@ function ProjectCard({ project }: ProjectCardProps) {
           )}
         </CardContent>
         <CardFooter className="flex justify-between mt-auto">
-          <Button className="bg-red-400 text-white flex items-center w-[230px] relative">
-            <HandCoins className="w-4 h-4 absolute left-4" />
-            Donate{" "}
-            {/* <Button variant="link" className="text-secondary">
-            Learn More
-          </Button> */}
-          </Button>
+          <Link href="https://donate.stripe.com/test_9AQ8xQbJx4Spdu84gg">
+            <Button className="bg-red-400 text-white flex items-center w-[230px] relative">
+              <HandCoins className="w-4 h-4 absolute left-4" />
+              Donate{" "}
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </Link>
