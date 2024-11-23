@@ -5,7 +5,7 @@ import { isUserAdmin } from "@/lib/admin";
 
 export async function POST(request: Request) {
   const { userId } = auth();
-  
+
   if (!userId || !isUserAdmin(userId)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -50,6 +50,46 @@ export async function GET() {
     console.error("Error fetching projects:", error);
     return NextResponse.json(
       { error: "Error fetching projects" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { projectId: string } }
+) {
+  try {
+    const data = await request.json();
+    const project = await db.project.update({
+      where: { id: parseInt(params.projectId) },
+      data,
+    });
+
+    return NextResponse.json(project);
+  } catch (error) {
+    console.error("Error updating project:", error);
+    return NextResponse.json(
+      { error: "Error updating project" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { projectId: string } }
+) {
+  try {
+    await db.project.delete({
+      where: { id: parseInt(params.projectId) },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    return NextResponse.json(
+      { error: "Error deleting project" },
       { status: 500 }
     );
   }
