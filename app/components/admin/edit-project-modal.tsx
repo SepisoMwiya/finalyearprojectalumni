@@ -48,12 +48,21 @@ export default function EditProjectModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const {
+        id,
+        createdAt,
+        updatedAt,
+        categories,
+        currentAmount,
+        ...updateData
+      } = formData;
+
       const response = await fetch(`/api/projects/${project.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updateData),
       });
 
       if (response.ok) {
@@ -112,4 +121,4 @@ export default function EditProjectModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}
