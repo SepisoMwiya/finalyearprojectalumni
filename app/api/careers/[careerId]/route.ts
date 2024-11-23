@@ -41,6 +41,14 @@ export async function DELETE(
   }
 
   try {
+    // First delete related skills
+    await db.careerSkill.deleteMany({
+      where: {
+        careerId: parseInt(params.careerId),
+      },
+    });
+
+    // Then delete the career
     await db.career.delete({
       where: { id: parseInt(params.careerId) },
     });

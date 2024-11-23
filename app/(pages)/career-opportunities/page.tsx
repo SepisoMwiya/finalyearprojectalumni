@@ -4,8 +4,20 @@ import JobListings from "@/components/career/job-listings";
 import CareerResources from "@/components/career/career-resources";
 import CareerStats from "@/components/career/career-stats";
 import MentorshipSection from "@/components/career/mentorship-section";
+import { db } from "@/lib/prisma";
 
-function CareerOpportunitiesPage() {
+async function CareerOpportunitiesPage() {
+  const careers = await db.career.findMany({
+    where: {
+      status: "active",
+    },
+    include: {
+      skills: true,
+    },
+    orderBy: {
+      postedDate: "desc",
+    },
+  });
   const stats = [
     {
       icon: <Briefcase className="w-8 h-8" />,
@@ -44,7 +56,7 @@ function CareerOpportunitiesPage() {
       </div>
 
       <CareerStats stats={stats} />
-      <JobListings />
+      <JobListings careers={careers} />
       <CareerResources />
       <MentorshipSection />
     </div>

@@ -5,6 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, MapPin, Building, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+
+interface CareerSkill {
+  id: number;
+  skill: string;
+  careerId: number;
+}
 
 interface Job {
   id: number;
@@ -13,29 +20,26 @@ interface Job {
   location: string;
   type: string;
   salary: string;
-  posted: string;
   description: string;
-  skills: string[];
+  skills: CareerSkill[];
+  status: string;
+  postedDate: Date;
 }
 
-const mockJobs: Job[] = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "Tech Corp Zambia",
-    location: "Lusaka",
-    type: "Full-time",
-    salary: "K25,000 - K35,000",
-    posted: "2 days ago",
-    description: "Looking for a skilled software engineer...",
-    skills: ["React", "Node.js", "TypeScript"],
-  },
-  // Add more mock jobs...
-];
-
-export default function JobListings() {
+export default function JobListings({ careers }: { careers: Job[] }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string | null>(null);
+
+  const filteredJobs = careers.filter((job) => {
+    const matchesSearch = 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesType = !selectedType || job.type === selectedType;
+
+    return matchesSearch && matchesType;
+  });
 
   return (
     <section className="my-12">
@@ -59,7 +63,7 @@ export default function JobListings() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mockJobs.map((job) => (
+            {filteredJobs.map((job) => (
               <div
                 key={job.id}
                 className="border rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -73,7 +77,7 @@ export default function JobListings() {
                       <MapPin className="h-4 w-4 ml-2" />
                       <span>{job.location}</span>
                       <Clock className="h-4 w-4 ml-2" />
-                      <span>{job.posted}</span>
+                      <span>{formatDistanceToNow(new Date(job.postedDate), { addSuffix: true })}</span>
                     </div>
                   </div>
                   <Badge>{job.type}</Badge>
@@ -81,8 +85,8 @@ export default function JobListings() {
                 <p className="mt-3 text-gray-600">{job.description}</p>
                 <div className="mt-4 flex gap-2">
                   {job.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary">
-                      {skill}
+                    <Badge key={skill.id} variant="secondary">
+                      {skill.skill}
                     </Badge>
                   ))}
                 </div>
