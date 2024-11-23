@@ -72,13 +72,13 @@ const Footer = () => {
             </ul>
             <div className="flex flex-col items-start gap-4">
               <Button className="bg-white text-black font-bold rounded hover:bg-orange-400">
-                Login
+                <Link href="/sign-in">Login</Link>
               </Button>
               <Button className="bg-white text-black font-bold rounded hover:bg-orange-400">
-                Register
+                <Link href="/register">Register</Link>
               </Button>
               <Button className="bg-red-600 text-white font-bold rounded hover:bg-primary">
-                Make A Donation
+                <Link href="/donate">Make A Donation</Link>
               </Button>
             </div>
           </div>

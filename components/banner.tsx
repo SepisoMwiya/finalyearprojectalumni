@@ -1,8 +1,15 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { currentUser } from "@clerk/nextjs/server";
 
-function Banner() {
+interface BannerProps {
+  isAlumni: boolean;
+}
+
+function Banner({ isAlumni }: BannerProps) {
+  const user = currentUser();
+
   return (
     <div className="h-[380px] container">
       <div className="bg-banner-background bg-cover bg-center h-full container flex flex-col gap-6 items-center justify-center relative">
@@ -23,9 +30,11 @@ function Banner() {
           >
             <Link href="/donate">Make A Donation</Link>
           </Button>
-          <Button className="rounded-sm bg-white text-primary font-bold hover:bg-secondary hover:text-white">
-            <Link href="/sign-up">Join The Network</Link>
-          </Button>
+          {!isAlumni && (
+            <Button className="rounded-sm bg-white text-primary font-bold hover:bg-secondary hover:text-white">
+              <Link href="/register">Join The Network</Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>
