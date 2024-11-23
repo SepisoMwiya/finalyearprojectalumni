@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import React from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -47,18 +48,25 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="rounded-md border">
         <Table>
-          <TableHeader className="bg-green-600">
+          <TableHeader className="bg-gray-500">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead className="text-white" key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
+                {headerGroup.headers.map((header, index) => (
+                  <React.Fragment key={header.id}>
+                    {index < headerGroup.headers.length - 1 && (
+                      <TableHead className="text-white">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )}
+                    {index === headerGroup.headers.length - 1 && (
+                      <TableHead className="text-white">Actions</TableHead>
+                    )}
+                  </React.Fragment>
                 ))}
               </TableRow>
             ))}
