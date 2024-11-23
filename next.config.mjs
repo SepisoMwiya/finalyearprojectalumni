@@ -9,11 +9,20 @@ const nextConfig = {
       "via.placeholder.com",
       "images.unsplash.com",
       "randomuser.me",
+      "plus.unsplash.com",
     ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.pexels.com",
+      },
+      {
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
       },
     ],
   },

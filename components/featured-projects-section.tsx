@@ -10,7 +10,9 @@ interface FeaturedProjectsSectionProps {
   initialProjects: Project[];
 }
 
-function FeaturedProjectsSection({ initialProjects }: FeaturedProjectsSectionProps) {
+function FeaturedProjectsSection({
+  initialProjects,
+}: FeaturedProjectsSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
@@ -38,7 +40,7 @@ function FeaturedProjectsSection({ initialProjects }: FeaturedProjectsSectionPro
           ref={scrollContainerRef}
           className="flex gap-4 items-center justify-start overflow-x-hidden mb-12"
         >
-          {initialProjects.map((project) => (
+          {initialProjects.slice(0, 10).map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
