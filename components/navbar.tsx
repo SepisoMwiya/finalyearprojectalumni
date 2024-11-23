@@ -15,12 +15,14 @@ import LoadingOverlay from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import NotificationsDropdown from "./notifications/notifications-dropdown";
+import { useAdmin } from "@/hooks/use-admin";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
   const { isSignedIn } = useUser();
+  const isAdmin = useAdmin();
 
   const isActive = (path: string) => pathname === path;
   const handleLogin = () => {
@@ -147,6 +149,18 @@ function Navbar() {
                   Alumni
                 </NavigationMenuLink>
               </NavigationMenuItem>
+              {isAdmin && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink
+                    href="/admin-console"
+                    className={`hover:text-secondary ${
+                      isActive("/admin-console") ? "text-secondary font-bold" : ""
+                    }`}
+                  >
+                    Admin Console
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

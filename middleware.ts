@@ -8,6 +8,7 @@ export default authMiddleware({
     "/programs-and-events(.*)",
     "/career-opportunities(.*)",
     "/alumni(.*)",
+    "/admin-console(.*)",
   ],
   afterAuth(auth, req, evt) {
     // Handle auth state
