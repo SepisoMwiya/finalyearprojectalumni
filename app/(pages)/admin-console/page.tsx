@@ -8,9 +8,9 @@ import { db } from "@/lib/prisma";
 
 export default async function AdminConsolePage() {
   const { userId } = auth();
-  
+
   if (!userId || !isUserAdmin(userId)) {
-    redirect('/');
+    redirect("/");
   }
 
   // Fetch the total number of projects
@@ -22,12 +22,14 @@ export default async function AdminConsolePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 bg-green-600">
+            <CardTitle className="text-sm font-medium text-white">
+              Total Projects
+            </CardTitle>
+            <FileText className="h-4 w-4 text-white" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{projectCount}</div>
+          <CardContent className="bg-green-500">
+            <div className="text-2xl font-bold text-white">{projectCount}</div>
           </CardContent>
         </Card>
         {/* Add more stat cards here */}
