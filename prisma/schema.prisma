@@ -192,3 +192,27 @@ model Course {
   school  School   @relation(fields: [schoolId], references: [id])
   schoolId Int
 }
+
+model Career {
+  id          Int           @id @default(autoincrement())
+  title       String
+  company     String
+  location    String
+  type        String
+  salary      String
+  description String        @db.Text
+  skills      CareerSkill[]
+  status      String        @default("active")
+  postedDate  DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model CareerSkill {
+  id       Int     @id @default(autoincrement())
+  skill    String
+  career   Career  @relation(fields: [careerId], references: [id])
+  careerId Int
+
+  @@index([careerId])
+}

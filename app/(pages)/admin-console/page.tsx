@@ -24,14 +24,14 @@ export default async function AdminConsolePage() {
   }
 
   // Fetch all counts
-  const [projectCount, userCount, alumniCount] = await Promise.all([
+  const [projectCount, userCount, alumniCount, careerCount] = await Promise.all([
     db.project.count(),
     clerkClient.users.getCount(),
     db.alumni.count(),
+    db.career.count(),
   ]);
 
   // Using dummy data for features not yet implemented
-  const careerCount = 12;
   const opportunityCount = 8;
   const newsCount = 15;
 
