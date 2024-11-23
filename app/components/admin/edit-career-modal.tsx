@@ -31,11 +31,17 @@ export default function EditCareerModal({
   career,
   onCareerUpdated,
 }: EditCareerModalProps) {
-  const [formData, setFormData] = useState(career);
+  const [formData, setFormData] = useState({
+    ...career,
+    skills: career.skills.map(skill => skill.skill)
+  });
   const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
-    setFormData(career);
+    setFormData({
+      ...career,
+      skills: career.skills.map(skill => skill.skill)
+    });
   }, [career]);
 
   const handleAddSkill = () => {
@@ -65,7 +71,10 @@ export default function EditCareerModal({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(updateData),
+        body: JSON.stringify({
+          ...updateData,
+          skills: updateData.skills.map(skill => ({ skill }))
+        }),
       });
 
       if (response.ok) {

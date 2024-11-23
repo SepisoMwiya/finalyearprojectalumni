@@ -15,9 +15,29 @@ export async function PUT(
 
   try {
     const data = await request.json();
+    const { skills, ...careerData } = data;
+
+    // First, delete existing skills
+    await db.careerSkill.deleteMany({
+      where: {
+        careerId: parseInt(params.careerId),
+      },
+    });
+
+    // Then update the career with new skills
     const career = await db.career.update({
       where: { id: parseInt(params.careerId) },
-      data,
+      data: {
+        ...careerData,
+        skills: {
+          create: skills.map((skill: { skill: string }) => ({
+            skill: skill.skill,
+          })),
+        },
+      },
+      include: {
+        skills: true,
+      },
     });
 
     return NextResponse.json(career);
@@ -61,4 +81,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}
