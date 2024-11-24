@@ -104,6 +104,9 @@ export default function NewsManagement() {
           <DataTable
             columns={columnsWithActions}
             data={contents.filter((content) => content.type === contentType)}
+            meta={{
+              refreshData: fetchContents,
+            }}
           />
         )}
       </CardContent>
