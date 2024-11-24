@@ -37,31 +37,44 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
   const socket = useWebSocket();
 
   useEffect(() => {
-    // Fetch existing messages
-    const fetchMessages = async () => {
-      const response = await fetch(`/api/chats/${chatId}/messages`);
-      const data = await response.json();
-      setMessages(data);
-    };
-
-    fetchMessages();
-
-    // Listen for new messages
     if (socket) {
+      // Join the chat room
+      socket.emit('join-chat', chatId.toString());
+
+      // Listen for new messages
       socket.on(`chat:${chatId}`, (message: Message) => {
-        setMessages((prev) => [...prev, message]);
+        setMessages(prev => [...prev, message]);
+        // Create notification if message is from other user
+        if (message.senderId !== currentUserId) {
+          socket.emit('create-notification', {
+            type: 'NEW_MESSAGE',
+            fromAlumniId: message.senderId,
+            toAlumniId: currentUserId,
+            message: 'sent you a message',
+          });
+        }
       });
     }
 
     return () => {
       if (socket) {
         socket.off(`chat:${chatId}`);
+        socket.emit('leave-chat', chatId.toString());
       }
     };
-  }, [chatId, socket]);
+  }, [socket, chatId, currentUserId]);
+
+  // Fetch initial messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const response = await fetch(`/api/chats/${chatId}/messages`);
+      const data = await response.json();
+      setMessages(data);
+    };
+    fetchMessages();
+  }, [chatId]);
 
   useEffect(() => {
-    // Scroll to bottom when new messages arrive
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -78,7 +91,10 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
       });
 
       if (!response.ok) throw new Error("Failed to send message");
-
+      const message = await response.json();
+      
+      // Optimistically add message to state
+      setMessages(prev => [...prev, message]);
       setNewMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
