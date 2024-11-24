@@ -21,16 +21,21 @@ const page = async ({ params }: { params: { projectId: string } }) => {
   return (
     <div className="container mx-auto p-6 lg:px-12">
       {/* Header section with main image */}
-      <header className="relative h-[75vh] lg:h-[85vh]">
-        <Image
-          src={project.imageUrl || "https://via.placeholder.com/1600x900"}
-          alt={project.title}
-          className="w-full h-full object-cover"
-          layout="fill"
-        />
-        <div className="absolute text-white bottom-0 left-0 bg-opacity-90 bg-green-700 p-6">
-          <h1 className="text-5xl font-bold">{project.title}</h1>
-          <p className="text-2xl">{project.description}</p>
+      <header className="relative w-full h-[600px]">
+        <div className="relative w-full h-full">
+          <Image
+            src={project.imageUrl || "https://via.placeholder.com/1600x900"}
+            alt={project.title}
+            className="object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+            priority
+            quality={90}
+          />
+          <div className="absolute text-white bottom-0 left-0 right-0 bg-opacity-90 bg-green-700 p-6">
+            <h1 className="text-5xl font-bold">{project.title}</h1>
+            <p className="text-2xl">{project.description}</p>
+          </div>
         </div>
       </header>
 
