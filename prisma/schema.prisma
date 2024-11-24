@@ -216,3 +216,18 @@ model CareerSkill {
 
   @@index([careerId])
 }
+
+model Content {
+  id          Int      @id @default(autoincrement())
+  type        String   // "news" or "event"
+  title       String
+  description String
+  content     String   @db.Text
+  date        DateTime
+  endDate     DateTime? // For events only
+  location    String?  // For events only
+  imageUrl    String
+  status      String   @default("draft") // draft, published, archived
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
