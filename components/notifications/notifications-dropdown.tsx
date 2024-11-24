@@ -126,7 +126,10 @@ export default function NotificationsDropdown() {
                       {notification.type === "CONNECTION_REQUEST" ? (
                         <>sent you a connection request</>
                       ) : notification.type === "NEW_MESSAGE" ? (
-                        <Link href={`/chats/${notification.chatId}`}>
+                        <Link
+                          href={`/chats/${notification.chatId}`}
+                          className="hover:underline"
+                        >
                           <>sent you a message</>
                         </Link>
                       ) : null}
