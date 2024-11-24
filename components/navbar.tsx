@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import NotificationsDropdown from "./notifications/notifications-dropdown";
 import { useAdmin } from "@/hooks/use-admin";
+import MessagesDropdown from "@/components/messages/messages-dropdown";
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -55,6 +56,7 @@ function Navbar() {
             />
             {isSignedIn ? (
               <>
+                <MessagesDropdown />
                 <NotificationsDropdown />
                 <UserButton
                   afterSignOutUrl="/"
