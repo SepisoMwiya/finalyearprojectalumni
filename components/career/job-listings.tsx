@@ -31,7 +31,7 @@ export default function JobListings({ careers }: { careers: Job[] }) {
   const [selectedType, setSelectedType] = useState<string | null>(null);
 
   const filteredJobs = careers.filter((job) => {
-    const matchesSearch = 
+    const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -77,7 +77,11 @@ export default function JobListings({ careers }: { careers: Job[] }) {
                       <MapPin className="h-4 w-4 ml-2" />
                       <span>{job.location}</span>
                       <Clock className="h-4 w-4 ml-2" />
-                      <span>{formatDistanceToNow(new Date(job.postedDate), { addSuffix: true })}</span>
+                      <span>
+                        {formatDistanceToNow(new Date(job.postedDate), {
+                          addSuffix: true,
+                        })}
+                      </span>
                     </div>
                   </div>
                   <Badge>{job.type}</Badge>
@@ -92,7 +96,7 @@ export default function JobListings({ careers }: { careers: Job[] }) {
                 </div>
                 <div className="mt-4 flex justify-between items-center">
                   <span className="text-green-700 font-semibold">
-                    {job.salary}
+                    K {job.salary}
                   </span>
                   <Button>Apply Now</Button>
                 </div>

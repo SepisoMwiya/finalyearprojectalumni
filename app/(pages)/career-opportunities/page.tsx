@@ -55,7 +55,7 @@ async function CareerOpportunitiesPage() {
         </p>
       </div>
 
-      <CareerStats stats={stats} />
+      {/* <CareerStats stats={stats} /> */}
       <JobListings careers={careers} />
       <CareerResources />
       <MentorshipSection />
