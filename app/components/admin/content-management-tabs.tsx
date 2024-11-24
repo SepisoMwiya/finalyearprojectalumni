@@ -19,17 +19,12 @@ export default function ContentManagementTabs() {
         </TabsTrigger>
         <TabsTrigger value="news" className="flex items-center gap-2">
           <Newspaper />
-          News
+          News And Events
         </TabsTrigger>
         <TabsTrigger
-          value="opportunities"
+          value="career-resources"
           className="flex items-center gap-2"
-          disabled
         >
-          <Gift />
-          Opportunities
-        </TabsTrigger>
-        <TabsTrigger value="career-resources" className="flex items-center gap-2">
           <BookOpen />
           Career Resources
         </TabsTrigger>
