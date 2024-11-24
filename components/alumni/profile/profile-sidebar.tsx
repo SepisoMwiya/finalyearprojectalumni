@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export default function ProfileSidebar({
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
   const [isAddAchievementModalOpen, setIsAddAchievementModalOpen] =
     useState(false);
+  const [connections, setConnections] = useState(0);
+  const [schoolmates, setSchoolmates] = useState(0);
 
   const handleSkillAdded = () => {
     router.refresh();
@@ -35,6 +37,33 @@ export default function ProfileSidebar({
   const handleAchievementAdded = () => {
     router.refresh();
   };
+
+  useEffect(() => {
+    const fetchConnections = async () => {
+      try {
+        const response = await fetch(`/api/alumni/${profile.id}/connections`);
+        if (!response.ok) throw new Error("Failed to fetch connections");
+        const count = await response.json();
+        setConnections(count);
+      } catch (error) {
+        console.error("Error fetching connections:", error);
+      }
+    };
+
+    const fetchSchoolmates = async () => {
+      try {
+        const response = await fetch(`/api/alumni/${profile.id}/schoolmates`);
+        if (!response.ok) throw new Error("Failed to fetch schoolmates");
+        const count = await response.json();
+        setSchoolmates(count);
+      } catch (error) {
+        console.error("Error fetching schoolmates:", error);
+      }
+    };
+
+    fetchConnections();
+    fetchSchoolmates();
+  }, [profile.id]);
 
   return (
     <div className="space-y-6">
@@ -152,19 +181,11 @@ export default function ProfileSidebar({
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Connections</span>
-              <span className="font-semibold">
-                {profile.connections?.length || 0}
-              </span>
+              <span className="font-semibold">{connections}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">School Mates</span>
-              <span className="font-semibold">
-                {
-                  profile.connections.filter(
-                    (conn) => conn.alumni.school === profile.school
-                  ).length
-                }
-              </span>
+              <span className="font-semibold">{schoolmates}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Same Industry</span>
