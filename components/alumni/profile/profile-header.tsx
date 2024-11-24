@@ -12,6 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import { useParams, useRouter } from "next/dist/client/components/navigation";
 import ConnectionButton from "./connection-button";
 import { db } from "@/lib/prisma";
+import ChatButton from "@/components/chat/chat-button";
 
 interface ProfileHeaderProps {
   profile: Alumni & {
@@ -163,6 +164,7 @@ export default function ProfileHeader({
             </div>
 
             {renderConnectionButton()}
+            <ChatButton recipientId={profile.id} currentUserId={currentUserId} />
           </div>
 
           <div className="mt-4">

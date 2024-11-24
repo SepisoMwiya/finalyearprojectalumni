@@ -117,7 +117,7 @@ export default function ProfileTabs({
       <TabsContent value="connections">
         <Card className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {profile.connections.map((connection) => (
+            {profile.connections.map((connection: any) => (
               <Card key={connection.id} className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16">
@@ -156,14 +156,14 @@ export default function ProfileTabs({
       <TabsContent value="projects">
         <Card className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {profile.projects?.map((project) => (
+            {profile.projects?.map((project: any) => (
               <Card key={project.id} className="p-4">
                 <h3 className="font-semibold">{project.title}</h3>
                 <p className="text-sm text-gray-600 mt-1">
                   {project.description}
                 </p>
                 <div className="flex gap-2 mt-2">
-                  {project.categories?.map((category) => (
+                  {project.categories?.map((category: any) => (
                     <Badge key={category.id} variant="secondary">
                       {category.name}
                     </Badge>
@@ -179,6 +179,9 @@ export default function ProfileTabs({
         isOpen={isAddExperienceModalOpen}
         onClose={() => setIsAddExperienceModalOpen(false)}
         alumniId={profile.id}
+        onExperienceAdded={() => {
+          setIsAddExperienceModalOpen(false);
+        }}
       />
     </Tabs>
   );
