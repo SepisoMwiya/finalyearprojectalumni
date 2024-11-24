@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 interface Notification {
   id: number;
@@ -101,14 +102,17 @@ export default function NotificationsDropdown() {
                 >
                   <div className="flex-1">
                     <p className="text-sm">
-                      <span className="font-semibold">
-                        {notification.fromAlumni.firstName}{" "}
-                        {notification.fromAlumni.lastName}
-                      </span>{" "}
+                      <Link href={`/alumni/${notification.fromAlumni.id}`}>
+                        <span className="font-semibold hover:underline">
+                          {notification.fromAlumni.firstName}{" "}
+                          {notification.fromAlumni.lastName}
+                        </span>{" "}
+                      </Link>
                       sent you a connection request
                     </p>
                     <p className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(notification.createdAt))} ago
+                      {formatDistanceToNow(new Date(notification.createdAt))}{" "}
+                      ago
                     </p>
                     <div className="mt-2 flex gap-2">
                       <Button
@@ -132,4 +136,4 @@ export default function NotificationsDropdown() {
       </PopoverContent>
     </Popover>
   );
-} 
+}
