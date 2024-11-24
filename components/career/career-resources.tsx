@@ -1,66 +1,39 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  BookOpen,
-  Video,
-  FileText,
-  Download,
-  ExternalLink,
-} from "lucide-react";
+import { BookOpen, Video, FileText, ExternalLink } from "lucide-react";
+import { db } from "@/lib/prisma";
+import ResourceButton from "./resource-button";
 
 interface Resource {
-  id: number;
+  id: string;
   title: string;
-  type: "video" | "document" | "course";
+  type: string;
   description: string;
-  tags: string[];
-  link: string;
+  url: string;
+  category: string;
 }
 
-const resources: Resource[] = [
-  {
-    id: 1,
-    title: "Resume Writing Masterclass",
-    type: "video",
-    description:
-      "Learn how to craft a compelling resume that stands out to employers.",
-    tags: ["Resume", "Career Tips"],
-    link: "#",
-  },
-  {
-    id: 2,
-    title: "Interview Preparation Guide",
-    type: "document",
-    description: "Comprehensive guide to ace your job interviews.",
-    tags: ["Interview", "Career Tips"],
-    link: "#",
-  },
-  {
-    id: 3,
-    title: "Professional Networking Course",
-    type: "course",
-    description: "Master the art of building professional relationships.",
-    tags: ["Networking", "Professional Development"],
-    link: "#",
-  },
-];
-
 const getResourceIcon = (type: string) => {
-  switch (type) {
+  switch (type.toLowerCase()) {
     case "video":
       return <Video className="h-5 w-5" />;
     case "document":
       return <FileText className="h-5 w-5" />;
-    case "course":
-      return <BookOpen className="h-5 w-5" />;
+    case "link":
+      return <ExternalLink className="h-5 w-5" />;
     default:
-      return null;
+      return <BookOpen className="h-5 w-5" />;
   }
 };
 
-export default function CareerResources() {
+async function CareerResources() {
+  const resources = await db.careerResource.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
     <section className="my-12">
       <Card>
@@ -72,7 +45,7 @@ export default function CareerResources() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {resources.map((resource) => (
+            {resources.map((resource: Resource) => (
               <Card
                 key={resource.id}
                 className="hover:shadow-lg transition-shadow"
@@ -86,24 +59,10 @@ export default function CareerResources() {
                     {resource.description}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {resource.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary">
-                        {tag}
-                      </Badge>
-                    ))}
+                    <Badge variant="secondary">{resource.category}</Badge>
                   </div>
                   <div className="flex justify-between items-center">
-                    <Button variant="outline" size="sm">
-                      {resource.type === "document" ? (
-                        <>
-                          <Download className="h-4 w-4 mr-2" /> Download
-                        </>
-                      ) : (
-                        <>
-                          <ExternalLink className="h-4 w-4 mr-2" /> Access
-                        </>
-                      )}
-                    </Button>
+                    <ResourceButton type={resource.type} url={resource.url} />
                   </div>
                 </CardContent>
               </Card>
@@ -114,3 +73,5 @@ export default function CareerResources() {
     </section>
   );
 }
+
+export default CareerResources;
