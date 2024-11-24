@@ -9,19 +9,15 @@ import { Content } from "@prisma/client";
 import { format } from "date-fns";
 
 interface EventsProps {
-  events: Content[];
+  featuredEvent: Content | null;
+  upcomingEvents: Content[];
 }
 
-export default function Events({ events }: EventsProps) {
-  // Get the most recent event for the featured banner
-  const featuredEvent = events[0];
-  // Get the next 3 upcoming events for the sidebar
-  const upcomingEvents = events.slice(1, 4);
-
+export default function Events({ featuredEvent, upcomingEvents }: EventsProps) {
   return (
     <div className="container flex items-center justify-between gap-4 h-[510px]">
       {/* Featured Event */}
-      {featuredEvent && (
+      {featuredEvent ? (
         <div className="relative flex flex-col items-center w-full h-full rounded-md">
           <Image
             src={featuredEvent.imageUrl}
@@ -39,9 +35,7 @@ export default function Events({ events }: EventsProps) {
                 <h3 className="text-2xl font-bold text-white">
                   {featuredEvent.title}
                 </h3>
-                <p className="text-white text-sm">
-                  {featuredEvent.description}
-                </p>
+                <p className="text-white text-sm">{featuredEvent.description}</p>
               </div>
               <Link
                 href={`/events/${featuredEvent.id}`}
@@ -50,16 +44,11 @@ export default function Events({ events }: EventsProps) {
                 [More]
               </Link>
             </div>
-            {/* Navigation buttons */}
-            <div className="flex items-center justify-center gap-4">
-              <Button className="bg-orange-400 text-white rounded-full p-2 hover:bg-gray-100 hover:text-orange-400">
-                <ChevronLeft className="w-6 h-6" />
-              </Button>
-              <Button className="bg-orange-400 text-white rounded-full p-2 hover:bg-gray-100 hover:text-orange-400">
-                <ChevronRight className="w-6 h-6" />
-              </Button>
-            </div>
           </div>
+        </div>
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-500">
+          No featured event at this time
         </div>
       )}
 
