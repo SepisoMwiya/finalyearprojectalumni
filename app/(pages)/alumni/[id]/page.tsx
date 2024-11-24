@@ -126,9 +126,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     notFound();
   }
 
+  // Get the current user's alumni record
+  const currentUserAlumni = user?.emailAddresses[0]?.emailAddress
+    ? await db.alumni.findFirst({
+        where: { email: user.emailAddresses[0].emailAddress },
+      })
+    : null;
+
   const isOwnProfile = user?.emailAddresses[0]?.emailAddress === profile.email;
-  const currentUserId = isOwnProfile ? params.id : undefined;
-  
+  const currentUserId = currentUserAlumni?.id.toString();
+
   const connectionStatus = await getConnectionStatus(params.id, currentUserId);
 
   return (

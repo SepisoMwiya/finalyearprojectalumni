@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useConnection } from "@/hooks/use-connection";
 import { Badge } from "@/components/ui/badge";
 
-const statuses = ["none", "pending", "connected"] as const;
+type ConnectionStatus = "none" | "pending" | "connected";
 
 interface ConnectionButtonProps {
   profileId: number;
-  connectionStatus: (typeof statuses)[number];
+  connectionStatus: ConnectionStatus;
   isOwnProfile: boolean;
 }
 
