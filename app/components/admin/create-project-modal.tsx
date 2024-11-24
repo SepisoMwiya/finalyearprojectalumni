@@ -44,6 +44,7 @@ export default function CreateProjectModal({
     startDate: new Date(),
     endDate: new Date(),
     fundingGoal: 0,
+    content: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -193,6 +194,20 @@ export default function CreateProjectModal({
                   fundingGoal: Number(e.target.value),
                 })
               }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="content">Project Content</Label>
+            <Textarea
+              id="content"
+              className="h-32"
+              placeholder="Enter the detailed project content here..."
+              value={formData.content}
+              onChange={(e) =>
+                setFormData({ ...formData, content: e.target.value })
+              }
+              required
             />
           </div>
 

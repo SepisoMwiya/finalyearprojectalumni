@@ -39,36 +39,11 @@ const page = async ({ params }: { params: { projectId: string } }) => {
         <div className="col-span-2">
           {/* Project description */}
           <section className="mb-12">
-            <h2 className="text-3xl font-semibold mb-4">
-              Coming Home Means Togetherness
-            </h2>
+            <h2 className="text-3xl font-semibold mb-4">{project.title}</h2>
             <p className="text-lg text-gray-700 leading-relaxed">
-              {/* Some placeholder content, replace with your project content */}
-              When the client secured a section in the well-established
-              boundaries of East Beach, a studio from the very south was chosen
-              to bring the vision of the new project alive. This project is a
-              culmination of years of hard work and dedication from our team. We
-              are proud to present this project to the community and hope it
-              will be well-received. Thank you for your support.
+              {project.content ||
+                "No detailed content available for this project."}
             </p>
-          </section>
-
-          {/* Additional Image grid */}
-          <section className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-            <Image
-              src={project.extraImage1 || "https://via.placeholder.com/400"}
-              alt="Extra image 1"
-              className="w-full h-auto rounded-sm"
-              width={400}
-              height={400}
-            />
-            <Image
-              src={project.extraImage2 || "https://via.placeholder.com/400"}
-              alt="Extra image 2"
-              className="w-full h-auto rounded-sm"
-              width={400}
-              height={400}
-            />
           </section>
         </div>
 
@@ -87,12 +62,6 @@ const page = async ({ params }: { params: { projectId: string } }) => {
                 <Target className="w-4 h-4 mr-2" /> Target Amount:
               </strong>{" "}
               K{project.fundingGoal}
-            </p>
-            <p className="text-lg leading-relaxed mt-4 flex items-center">
-              <strong className="flex items-center">
-                <Target className="w-4 h-4 mr-2" /> Current Amount:
-              </strong>{" "}
-              K{project.currentAmount}
             </p>
             <p className="text-lg leading-relaxed mt-4 flex items-center">
               <strong className="flex items-center">

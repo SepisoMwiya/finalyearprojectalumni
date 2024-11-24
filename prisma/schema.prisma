@@ -20,6 +20,7 @@ model Project {
   updatedAt   DateTime @updatedAt
   categories  ProjectCategoryRelation[]
   alumni      Alumni[]          @relation("AlumniProjects")
+  content     String? @db.Text
 }
 
 model ProjectCategory {

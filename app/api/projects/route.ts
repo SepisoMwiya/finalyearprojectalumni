@@ -15,7 +15,6 @@ export async function POST(request: Request) {
     const project = await db.project.create({
       data: {
         ...data,
-        currentAmount: 0, // Set default current amount to 0
       },
     });
 
