@@ -11,6 +11,7 @@ import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
+import { useWebSocket } from "@/hooks/use-websocket";
 
 interface Notification {
   id: number;
@@ -24,12 +25,15 @@ interface Notification {
     lastName: string;
     profileImage: string | null;
   };
+  chatId: number;
 }
 
 export default function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const socket = useWebSocket();
+  const currentUserId = 1; // Replace with actual current user ID
 
   const fetchNotifications = async () => {
     try {
@@ -47,10 +51,21 @@ export default function NotificationsDropdown() {
 
   useEffect(() => {
     fetchNotifications();
-    // Poll for new notifications every minute
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, []);
+
+    if (socket && currentUserId) {
+      socket.emit("join-notifications", currentUserId);
+
+      socket.on(`notifications:${currentUserId}`, () => {
+        fetchNotifications();
+      });
+    }
+
+    return () => {
+      if (socket && currentUserId) {
+        socket.off(`notifications:${currentUserId}`);
+      }
+    };
+  }, [socket, currentUserId]);
 
   const handleAcceptConnection = async (fromAlumniId: number) => {
     try {
@@ -108,25 +123,33 @@ export default function NotificationsDropdown() {
                           {notification.fromAlumni.lastName}
                         </span>{" "}
                       </Link>
-                      sent you a connection request
+                      {notification.type === "CONNECTION_REQUEST" ? (
+                        <>sent you a connection request</>
+                      ) : notification.type === "NEW_MESSAGE" ? (
+                        <Link href={`/chats/${notification.chatId}`}>
+                          <>sent you a message</>
+                        </Link>
+                      ) : null}
                     </p>
                     <p className="text-xs text-gray-500">
                       {formatDistanceToNow(new Date(notification.createdAt))}{" "}
                       ago
                     </p>
-                    <div className="mt-2 flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          handleAcceptConnection(notification.fromAlumni.id)
-                        }
-                      >
-                        Accept
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        Decline
-                      </Button>
-                    </div>
+                    {notification.type === "CONNECTION_REQUEST" && (
+                      <div className="mt-2 flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() =>
+                            handleAcceptConnection(notification.fromAlumni.id)
+                          }
+                        >
+                          Accept
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          Decline
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

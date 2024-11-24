@@ -18,27 +18,8 @@ io.on('connection', (socket) => {
     socket.leave(`chat:${chatId}`);
   });
 
-  socket.on('create-notification', async (data) => {
-    try {
-      await db.notification.create({
-        data: {
-          type: data.type,
-          message: data.message,
-          fromAlumniId: data.fromAlumniId,
-          toAlumniId: data.toAlumniId,
-          read: false,
-        },
-      });
-      
-      // Emit to specific user's notification channel
-      io.emit(`notifications:${data.toAlumniId}`, {
-        type: data.type,
-        message: data.message,
-        fromAlumniId: data.fromAlumniId,
-      });
-    } catch (error) {
-      console.error('Error creating notification:', error);
-    }
+  socket.on('join-notifications', (userId: string) => {
+    socket.join(`notifications:${userId}`);
   });
 
   socket.on('disconnect', () => {

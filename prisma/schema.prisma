@@ -179,7 +179,8 @@ model Notification {
   fromAlumniId Int
   createdAt DateTime @default(now())
   toAlumni   Alumni  @relation("receivedNotifications", fields: [toAlumniId], references: [id])
-  fromAlumni Alumni  @relation("sentNotifications", fields: [fromAlumniId], references: [id])
+  fromAlumni   Alumni  @relation("sentNotifications", fields: [fromAlumniId], references: [id])
+  chatId       Int?
 }
 
 model School {
