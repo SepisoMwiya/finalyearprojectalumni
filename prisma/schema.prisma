@@ -231,3 +231,21 @@ model Content {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model CareerResource {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        ResourceType @default(LINK)
+  url         String
+  category    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum ResourceType {
+  LINK
+  DOCUMENT
+}
+
+

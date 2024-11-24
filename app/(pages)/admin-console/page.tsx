@@ -24,16 +24,29 @@ export default async function AdminConsolePage() {
   }
 
   // Fetch all counts
-  const [projectCount, userCount, alumniCount, careerCount] = await Promise.all([
+  const [
+    projectCount,
+    userCount,
+    alumniCount,
+    careerCount,
+    newsCount,
+    eventsCount,
+  ] = await Promise.all([
     db.project.count(),
     clerkClient.users.getCount(),
     db.alumni.count(),
     db.career.count(),
+    db.content.count({
+      where: {
+        type: "news",
+      },
+    }),
+    db.content.count({
+      where: {
+        type: "event",
+      },
+    }),
   ]);
-
-  // Using dummy data for features not yet implemented
-  const opportunityCount = 8;
-  const newsCount = 15;
 
   const stats = [
     {
@@ -57,8 +70,8 @@ export default async function AdminConsolePage() {
       icon: Briefcase,
     },
     {
-      title: "Opportunities",
-      value: opportunityCount,
+      title: "Events",
+      value: eventsCount,
       icon: Target,
     },
     {
