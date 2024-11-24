@@ -114,7 +114,7 @@ function Navbar() {
                       : ""
                   }`}
                 >
-                  Programs &amp; Events
+                  News &amp; Events
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -154,7 +154,9 @@ function Navbar() {
                   <NavigationMenuLink
                     href="/admin-console"
                     className={`hover:text-secondary ${
-                      isActive("/admin-console") ? "text-secondary font-bold" : ""
+                      isActive("/admin-console")
+                        ? "text-secondary font-bold"
+                        : ""
                     }`}
                   >
                     Admin Console
