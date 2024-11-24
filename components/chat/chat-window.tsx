@@ -30,7 +30,11 @@ interface ChatWindowProps {
   };
 }
 
-export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWindowProps) {
+export default function ChatWindow({
+  chatId,
+  currentUserId,
+  otherUser,
+}: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -39,18 +43,18 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
   useEffect(() => {
     if (socket) {
       // Join the chat room
-      socket.emit('join-chat', chatId.toString());
+      socket.emit("join-chat", chatId.toString());
 
       // Listen for new messages
       socket.on(`chat:${chatId}`, (message: Message) => {
-        setMessages(prev => [...prev, message]);
+        setMessages((prev) => [...prev, message]);
         // Create notification if message is from other user
         if (message.senderId !== currentUserId) {
-          socket.emit('create-notification', {
-            type: 'NEW_MESSAGE',
+          socket.emit("create-notification", {
+            type: "NEW_MESSAGE",
             fromAlumniId: message.senderId,
             toAlumniId: currentUserId,
-            message: 'sent you a message',
+            message: "sent you a message",
           });
         }
       });
@@ -59,7 +63,7 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
     return () => {
       if (socket) {
         socket.off(`chat:${chatId}`);
-        socket.emit('leave-chat', chatId.toString());
+        socket.emit("leave-chat", chatId.toString());
       }
     };
   }, [socket, chatId, currentUserId]);
@@ -92,9 +96,9 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
 
       if (!response.ok) throw new Error("Failed to send message");
       const message = await response.json();
-      
+
       // Optimistically add message to state
-      setMessages(prev => [...prev, message]);
+      setMessages((prev) => [...prev, message]);
       setNewMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -103,36 +107,40 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
 
   return (
     <Card className="h-[600px] flex flex-col">
-      <CardHeader>
+      <CardHeader className="flex-none">
         <CardTitle>{`${otherUser.firstName} ${otherUser.lastName}`}</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
-          <div className="space-y-4">
+      <CardContent className="flex-1 flex flex-col overflow-hidden p-4">
+        <ScrollArea className="flex-1">
+          <div className="space-y-4 pr-4">
             {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${
-                  message.senderId === currentUserId ? "justify-end" : "justify-start"
+                  message.senderId === currentUserId
+                    ? "justify-end"
+                    : "justify-start"
                 }`}
               >
                 <div
                   className={`max-w-[70%] rounded-lg p-3 ${
                     message.senderId === currentUserId
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-green-700 text-white"
                       : "bg-muted"
                   }`}
                 >
-                  <p>{message.content}</p>
+                  <p className="break-words">{message.content}</p>
                   <span className="text-xs opacity-70">
-                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                    {formatDistanceToNow(new Date(message.createdAt), {
+                      addSuffix: true,
+                    })}
                   </span>
                 </div>
               </div>
             ))}
           </div>
         </ScrollArea>
-        <div className="flex gap-2 mt-4">
+        <div className="flex gap-2 mt-4 flex-none">
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
@@ -146,4 +154,4 @@ export default function ChatWindow({ chatId, currentUserId, otherUser }: ChatWin
       </CardContent>
     </Card>
   );
-} 
+}
