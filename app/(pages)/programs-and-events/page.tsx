@@ -31,7 +31,7 @@ async function ProgramsAndEventsPage() {
     db.content.findMany({
       where: {
         type: "event",
-        status: "scheduled",
+        OR: [{ status: "published" }, { status: "scheduled" }],
         date: {
           gte: now,
         },

@@ -5,12 +5,20 @@ import { format } from "date-fns";
 import { ArrowLeft, MapPin, Calendar } from "lucide-react";
 import Link from "next/link";
 
-export default async function EventPage({ params }: { params: { id: string } }) {
+export default async function EventPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const event = await db.content.findFirst({
     where: {
       id: parseInt(params.id),
       type: "event",
-      status: "published",
+      OR: [
+        { status: "published" },
+        { status: "featured" },
+        { status: "scheduled" },
+      ],
     },
   });
 
@@ -61,4 +69,4 @@ export default async function EventPage({ params }: { params: { id: string } }) 
       </article>
     </div>
   );
-} 
+}
