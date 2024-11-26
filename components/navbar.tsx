@@ -41,7 +41,7 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-4 text-white">
             <div className="flex items-center gap-2">
               <Phone className="w-4 h-4" />
-              <p className="text-sm">0972539594</p>
+              <p className="text-sm">0976226381</p>
             </div>
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4" />
