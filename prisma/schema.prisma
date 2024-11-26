@@ -198,18 +198,19 @@ model Course {
 }
 
 model Career {
-  id          Int           @id @default(autoincrement())
-  title       String
-  company     String
-  location    String
-  type        String
-  salary      String
-  description String        @db.Text
-  skills      CareerSkill[]
-  status      String        @default("active")
-  postedDate  DateTime      @default(now())
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id              Int           @id @default(autoincrement())
+  title           String
+  company         String
+  location        String
+  type            String
+  salary          String
+  description     String
+  status          String        @default("active")
+  postedDate      DateTime      @default(now())
+  skills          CareerSkill[]
+  applicationLink String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model CareerSkill {

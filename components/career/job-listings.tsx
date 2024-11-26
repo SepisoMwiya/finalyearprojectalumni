@@ -24,7 +24,16 @@ interface Job {
   skills: CareerSkill[];
   status: string;
   postedDate: Date;
+  applicationLink: string;
 }
+
+const ensureHttps = (url: string) => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `https://${url}`;
+};
 
 export default function JobListings({ careers }: { careers: Job[] }) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,7 +107,14 @@ export default function JobListings({ careers }: { careers: Job[] }) {
                   <span className="text-green-700 font-semibold">
                     K {job.salary}
                   </span>
-                  <Button>Apply Now</Button>
+                  <Button
+                    onClick={() =>
+                      window.open(ensureHttps(job.applicationLink), "_blank")
+                    }
+                    disabled={!job.applicationLink}
+                  >
+                    {job.applicationLink ? "Apply Now" : "Applications Closed"}
+                  </Button>
                 </div>
               </div>
             ))}

@@ -39,6 +39,7 @@ export default function CreateCareerModal({
     description: "",
     skills: [] as string[],
     status: "active",
+    applicationLink: "",
   });
 
   const [newSkill, setNewSkill] = useState("");
@@ -163,6 +164,18 @@ export default function CreateCareerModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="applicationLink">Application Link</Label>
+            <Input
+              id="applicationLink"
+              value={formData.applicationLink}
+              onChange={(e) =>
+                setFormData({ ...formData, applicationLink: e.target.value })
+              }
+              placeholder="https://example.com/apply"
             />
           </div>
 

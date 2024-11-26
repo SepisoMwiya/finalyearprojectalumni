@@ -33,14 +33,14 @@ export default function EditCareerModal({
 }: EditCareerModalProps) {
   const [formData, setFormData] = useState({
     ...career,
-    skills: career.skills.map(skill => skill.skill)
+    skills: career.skills.map((skill) => skill.skill),
   });
   const [newSkill, setNewSkill] = useState("");
 
   useEffect(() => {
     setFormData({
       ...career,
-      skills: career.skills.map(skill => skill.skill)
+      skills: career.skills.map((skill) => skill.skill),
     });
   }, [career]);
 
@@ -57,7 +57,7 @@ export default function EditCareerModal({
   const handleRemoveSkill = (skillToRemove: string) => {
     setFormData({
       ...formData,
-      skills: formData.skills.filter((skill) => skill !== skillToRemove),
+      skills: formData.skills.filter((skill: string) => skill !== skillToRemove),
     });
   };
 
@@ -73,7 +73,7 @@ export default function EditCareerModal({
         },
         body: JSON.stringify({
           ...updateData,
-          skills: updateData.skills.map(skill => ({ skill }))
+          skills: updateData.skills.map((skill: string) => ({ skill })),
         }),
       });
 
@@ -133,7 +133,9 @@ export default function EditCareerModal({
             <Label htmlFor="type">Job Type</Label>
             <Select
               value={formData.type}
-              onValueChange={(value) => setFormData({ ...formData, type: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, type: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select job type" />
@@ -169,6 +171,18 @@ export default function EditCareerModal({
                 setFormData({ ...formData, description: e.target.value })
               }
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="applicationLink">Application Link</Label>
+            <Input
+              id="applicationLink"
+              value={formData.applicationLink || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, applicationLink: e.target.value })
+              }
+              placeholder="https://example.com/apply"
             />
           </div>
 
@@ -213,4 +227,4 @@ export default function EditCareerModal({
       </DialogContent>
     </Dialog>
   );
-} 
+}
