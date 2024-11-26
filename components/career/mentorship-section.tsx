@@ -76,7 +76,36 @@ export default function MentorshipSection() {
   }, [toast, user]);
 
   const handleRequestMentorship = async (mentorId: number) => {
-    router.push(`/mentorship/request/${mentorId}`);
+    try {
+      const response = await fetch("/api/mentorship/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mentorId,
+          message: "I would like to connect with you as a mentor.",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      toast({
+        title: "Success",
+        description: "Mentorship request sent successfully!",
+      });
+
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send request",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {

@@ -77,6 +77,7 @@ model Alumni {
   messages        Message[]       
   sentNotifications     Notification[] @relation("sentNotifications")
   receivedNotifications Notification[] @relation("receivedNotifications")
+  mentorshipRequests MentorshipRequest[] @relation("MenteeRequests")
 }
 
 model Experience {
@@ -292,6 +293,7 @@ model Mentor {
   updatedAt     DateTime  @updatedAt
   sessions      MentorshipSession[]
   expertise     MentorExpertise[]
+  mentorshipRequests MentorshipRequest[]
 }
 
 model MentorExpertise {
@@ -319,6 +321,22 @@ model MentorshipSession {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
+  @@index([mentorId])
+  @@index([menteeId])
+}
+
+model MentorshipRequest {
+  id          Int       @id @default(autoincrement())
+  mentorId    Int
+  menteeId    Int
+  status      String    @default("pending") // pending, accepted, rejected
+  message     String?   @db.Text
+  mentor      Mentor    @relation(fields: [mentorId], references: [id])
+  mentee      Alumni    @relation("MenteeRequests", fields: [menteeId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([mentorId, menteeId])
   @@index([mentorId])
   @@index([menteeId])
 }
