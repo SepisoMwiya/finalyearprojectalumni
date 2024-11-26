@@ -35,7 +35,9 @@ export default function Events({ featuredEvent, upcomingEvents }: EventsProps) {
                 <h3 className="text-2xl font-bold text-white">
                   {featuredEvent.title}
                 </h3>
-                <p className="text-white text-sm">{featuredEvent.description}</p>
+                <p className="text-white text-sm">
+                  {featuredEvent.description}
+                </p>
               </div>
               <Link
                 href={`/events/${featuredEvent.id}`}
@@ -86,7 +88,10 @@ export default function Events({ featuredEvent, upcomingEvents }: EventsProps) {
         </ul>
         {/* See All Events Button */}
         <div className="mt-4 text-center flex items-center justify-center gap-2 underline">
-          <Link href="#" className=" text-white text-underline w-full py-2">
+          <Link
+            href="/events"
+            className=" text-white text-underline w-full py-2"
+          >
             See All Events
           </Link>
           <Button className="bg-orange-400 text-white rounded-full p-2 hover:bg-gray-100 hover:text-orange-400">
