@@ -8,6 +8,7 @@ import Image from "next/image";
 import { Users, Star, Briefcase, Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/nextjs";
 
 interface Expertise {
   id: number;
@@ -34,10 +35,25 @@ interface Mentor {
 export default function MentorshipSection() {
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentAlumniId, setCurrentAlumniId] = useState<number | null>(null);
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useUser();
 
   useEffect(() => {
+    async function fetchCurrentAlumni() {
+      if (!user) return;
+      try {
+        const response = await fetch(`/api/alumni/current`);
+        if (response.ok) {
+          const data = await response.json();
+          setCurrentAlumniId(data.id);
+        }
+      } catch (error) {
+        console.error("Failed to fetch current alumni:", error);
+      }
+    }
+
     async function fetchMentors() {
       try {
         const response = await fetch("/api/mentors");
@@ -55,11 +71,11 @@ export default function MentorshipSection() {
       }
     }
 
+    fetchCurrentAlumni();
     fetchMentors();
-  }, [toast]);
+  }, [toast, user]);
 
   const handleRequestMentorship = async (mentorId: number) => {
-    // Implement mentorship request logic
     router.push(`/mentorship/request/${mentorId}`);
   };
 
@@ -126,8 +142,11 @@ export default function MentorshipSection() {
                   <Button
                     className="w-full"
                     onClick={() => handleRequestMentorship(mentor.id)}
+                    disabled={currentAlumniId === mentor.id}
                   >
-                    Request Mentorship
+                    {currentAlumniId === mentor.id
+                      ? "This is you"
+                      : "Request Mentorship"}
                   </Button>
                 </CardContent>
               </Card>
