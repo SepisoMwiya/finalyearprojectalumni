@@ -51,7 +51,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link href="/programs-and-events" className="hover:font-bold">
-                  Programs & Events
+                  News & Events
                 </Link>
               </li>
               <li>
