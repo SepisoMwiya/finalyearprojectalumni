@@ -61,6 +61,8 @@ model Alumni {
   profileImage    String?       @db.VarChar(255)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  mentor          Mentor?
+  menteeSessions  MentorshipSession[] @relation("MenteeSessions")
 
   experiences     Experience[]
   skills          Skill[]
@@ -274,6 +276,51 @@ model Message {
 
   @@index([chatId])
   @@index([senderId])
+}
+
+model Mentor {
+  id            Int       @id @default(autoincrement())
+  alumniId      Int       @unique
+  alumni        Alumni    @relation(fields: [alumniId], references: [id])
+  bio           String    @db.Text
+  hourlyRate    Float?
+  availability  String    @default("Available")
+  rating        Float     @default(0)
+  totalRatings  Int       @default(0)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      MentorshipSession[]
+  expertise     MentorExpertise[]
+}
+
+model MentorExpertise {
+  id        Int      @id @default(autoincrement())
+  name      String
+  mentorId  Int
+  mentor    Mentor   @relation(fields: [mentorId], references: [id])
+
+  @@index([mentorId])
+}
+
+model MentorshipSession {
+  id          Int       @id @default(autoincrement())
+  mentorId    Int
+  menteeId    Int
+  mentor      Mentor    @relation(fields: [mentorId], references: [id])
+  mentee      Alumni    @relation("MenteeSessions", fields: [menteeId], references: [id])
+  status      String    @default("pending") // pending, accepted, completed, cancelled
+  startTime   DateTime
+  endTime     DateTime
+  topic       String
+  notes       String?   @db.Text
+  rating      Int?
+  feedback    String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([mentorId])
+  @@index([menteeId])
 }
 
 

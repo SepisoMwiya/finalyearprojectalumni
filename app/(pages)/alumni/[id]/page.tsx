@@ -36,6 +36,7 @@ async function getAlumniProfile(id: string) {
         },
       },
       projects: true,
+      mentor: true,
       sentConnections: {
         include: {
           toAlumni: {
@@ -75,7 +76,6 @@ async function getAlumniProfile(id: string) {
 
   if (!profile) return null;
 
-  // Combine and format connections
   const connections = [
     ...profile.sentConnections.map((conn) => ({
       id: conn.id,
@@ -120,6 +120,7 @@ async function getConnectionStatus(profileId: string, currentUserId?: string) {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const user = await currentUser();
+
   const profile = await getAlumniProfile(params.id);
 
   if (!profile) {

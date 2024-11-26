@@ -136,7 +136,12 @@ async function getAlumni(
 export default async function AlumniPage({
   searchParams,
 }: {
-  searchParams: { q?: string; schools?: string; years?: string; locations?: string };
+  searchParams: {
+    q?: string;
+    schools?: string;
+    years?: string;
+    locations?: string;
+  };
 }) {
   const { userId } = auth();
   const { totalAlumni, totalCountries } = await getAlumniStats();

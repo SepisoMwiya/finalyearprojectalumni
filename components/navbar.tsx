@@ -6,7 +6,7 @@ import {
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { Mail, Menu, Phone, X } from "lucide-react";
+import { Mail, Menu, Phone, X, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -159,6 +159,16 @@ function Navbar() {
                   }`}
                 >
                   Alumni
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/mentorship"
+                  className={`hover:text-secondary ${
+                    isActive("/mentorship") ? "text-secondary font-bold" : ""
+                  }`}
+                >
+                  Mentorship
                 </NavigationMenuLink>
               </NavigationMenuItem>
               {isAdmin && (

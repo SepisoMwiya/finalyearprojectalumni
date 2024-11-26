@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Mail, Linkedin, Award, BookOpen, MapPin } from "lucide-react";
-import { Alumni, Skill, Achievement } from "@prisma/client";
+import { Alumni, Skill, Achievement, Mentor } from "@prisma/client";
 import AddSkillModal from "./add-skill-modal";
 import AddAchievementModal from "./add-achievement-modal";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ interface ProfileSidebarProps {
     skills: Skill[];
     achievements: Achievement[];
     connections: any[];
+    mentor: Mentor | null;
   };
   isOwnProfile: boolean;
 }
@@ -203,6 +204,26 @@ export default function ProfileSidebar({
           </div>
         </CardContent>
       </Card>
+
+      {isOwnProfile && !profile.mentor && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Mentorship</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">
+              Share your experience and help guide fellow alumni in their career
+              journey.
+            </p>
+            <Button
+              className="w-full"
+              onClick={() => router.push("/mentorship/become-mentor")}
+            >
+              Become a Mentor
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <AddSkillModal
         isOpen={isAddSkillModalOpen}
