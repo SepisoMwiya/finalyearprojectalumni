@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const MissionSection = () => {
   return (
@@ -48,12 +49,12 @@ const MissionSection = () => {
               initiatives.
             </li>
           </ul>
-          <a
-            href="#"
+          <Link
+            href="/about"
             className="text-green-700 font-semibold mt-4 inline-block hover:underline"
           >
             Read More
-          </a>
+          </Link>
         </div>
       </div>
     </section>

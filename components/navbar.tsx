@@ -109,6 +109,16 @@ function Navbar() {
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink
+                  href="/about"
+                  className={`hover:text-secondary ${
+                    isActive("/about") ? "text-secondary font-bold" : ""
+                  }`}
+                >
+                  About
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
                   href="/programs-and-events"
                   className={`hover:text-secondary ${
                     isActive("/programs-and-events")
