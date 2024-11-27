@@ -8,10 +8,12 @@ import {
   User,
   BookOpen,
   Camera,
+  GraduationCap,
 } from "lucide-react";
 import NewsManagement from "./news-management";
 import CareerResourcesTabWrapper from "./tabs/career-resources-tab-wrapper";
 import GalleryTabWrapper from "./tabs/gallery-tab-wrapper";
+import AlumniTabWrapper from "./tabs/alumni-tab-wrapper";
 
 export default function ContentManagementTabs() {
   return (
@@ -28,6 +30,10 @@ export default function ContentManagementTabs() {
         <TabsTrigger value="news" className="flex items-center gap-2">
           <Newspaper />
           News And Events
+        </TabsTrigger>
+        <TabsTrigger value="alumni" className="flex items-center gap-2">
+          <GraduationCap />
+          Alumni
         </TabsTrigger>
         <TabsTrigger
           value="career-resources"
@@ -50,10 +56,8 @@ export default function ContentManagementTabs() {
       <TabsContent value="news">
         <NewsManagement />
       </TabsContent>
-      <TabsContent value="opportunities">
-        <div className="text-center p-4 text-gray-500">
-          Opportunities management coming soon
-        </div>
+      <TabsContent value="alumni">
+        <AlumniTabWrapper />
       </TabsContent>
       <TabsContent value="career-resources">
         <CareerResourcesTabWrapper />
