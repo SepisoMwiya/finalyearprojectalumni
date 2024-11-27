@@ -22,10 +22,14 @@ async function getAlumniStats() {
   const countries = await db.alumni.groupBy({
     by: ["country"],
   });
+  const totalSchools = await db.alumni.groupBy({
+    by: ["school"],
+  });
 
   return {
     totalAlumni,
     totalCountries: countries.length,
+    totalSchools: totalSchools.length,
   };
 }
 
@@ -144,7 +148,7 @@ export default async function AlumniPage({
   };
 }) {
   const { userId } = auth();
-  const { totalAlumni, totalCountries } = await getAlumniStats();
+  const { totalAlumni, totalCountries, totalSchools } = await getAlumniStats();
 
   // Get current alumni ID if user is logged in
   let currentAlumniId: string | null = null;
@@ -179,27 +183,10 @@ export default async function AlumniPage({
       label: "Countries",
       description: "Global presence",
     },
-    {
-      icon: <Briefcase className="w-8 h-8" />,
-      value: "75%",
-      label: "Employment Rate",
-      description: "Within 6 months",
-    },
-    {
-      icon: <Award className="w-8 h-8" />,
-      value: "500+",
-      label: "Industry Leaders",
-      description: "In various sectors",
-    },
-    {
-      icon: <Building className="w-8 h-8" />,
-      value: "1,000+",
-      label: "Companies",
-      description: "Founded by alumni",
-    },
+
     {
       icon: <GraduationCap className="w-8 h-8" />,
-      value: "12",
+      value: `${totalSchools}+`,
       label: "Schools",
       description: "Academic diversity",
     },
