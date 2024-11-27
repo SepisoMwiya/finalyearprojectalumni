@@ -41,7 +41,7 @@ export default function MessagesDropdown() {
   useEffect(() => {
     const fetchCurrentAlumni = async () => {
       if (!user?.emailAddresses[0]?.emailAddress) return;
-      
+
       try {
         const response = await fetch(`/api/alumni/current`);
         if (response.ok) {
@@ -57,16 +57,16 @@ export default function MessagesDropdown() {
   }, [user]);
 
   const unreadChats = chats.filter(
-    (chat) => 
-      chat.lastMessage && 
-      !chat.lastMessage.read && 
+    (chat) =>
+      chat.lastMessage &&
+      !chat.lastMessage.read &&
       chat.lastMessage.senderId !== currentAlumniId
   );
 
   const readChats = chats.filter(
-    (chat) => 
-      !chat.lastMessage || 
-      chat.lastMessage.read || 
+    (chat) =>
+      !chat.lastMessage ||
+      chat.lastMessage.read ||
       chat.lastMessage.senderId === currentAlumniId
   );
 
@@ -180,7 +180,7 @@ export default function MessagesDropdown() {
 
 function ChatItem({ chat, onClick }: { chat: Chat; onClick: () => void }) {
   const otherMember = chat.members[0];
-  
+
   return (
     <div
       onClick={onClick}

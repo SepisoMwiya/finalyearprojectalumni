@@ -12,6 +12,7 @@ import {
   GraduationCap,
   Edit,
   Plus,
+  User,
 } from "lucide-react";
 import { Alumni } from "@prisma/client";
 import AddExperienceModal from "./add-experience-modal";
@@ -121,14 +122,19 @@ export default function ProfileTabs({
               <Card key={connection.id} className="p-4">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16">
-                    <Image
-                      src={
-                        connection.alumni.profileImage || "/default-avatar.png"
-                      }
-                      alt={`${connection.alumni.firstName} ${connection.alumni.lastName}`}
-                      fill
-                      className="rounded-full object-cover"
-                    />
+                    {connection.alumni.profileImage ? (
+                      <Image
+                        src={
+                          connection.alumni.profileImage ||
+                          "/default-avatar.png"
+                        }
+                        alt={`${connection.alumni.firstName} ${connection.alumni.lastName}`}
+                        fill
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-16 w-16 text-gray-400" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold">

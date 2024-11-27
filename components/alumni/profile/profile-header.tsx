@@ -4,7 +4,15 @@ import { useState, useMemo } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, MapPin, Building, Mail, Linkedin, Globe } from "lucide-react";
+import {
+  Edit,
+  MapPin,
+  Building,
+  Mail,
+  Linkedin,
+  Globe,
+  User,
+} from "lucide-react";
 
 import { Alumni } from "@prisma/client";
 import EditProfileModal from "./edit-profile-modal";
@@ -123,12 +131,16 @@ export default function ProfileHeader({
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex flex-col md:flex-row gap-6">
         <div className="relative w-32 h-32">
-          <Image
-            src={profile.imageUrl || "/default-avatar.png"}
-            alt={`${profile.firstName} ${profile.lastName}`}
-            fill
-            className="rounded-full object-cover"
-          />
+          {profile.profileImage ? (
+            <Image
+              src={profile.profileImage || "/default-avatar.png"}
+              alt={`${profile.firstName} ${profile.lastName}`}
+              fill
+              className="rounded-full object-cover"
+            />
+          ) : (
+            <User className="h-32 w-32 text-gray-400" />
+          )}
           {isOwnProfile && (
             <Button
               size="sm"
@@ -164,7 +176,10 @@ export default function ProfileHeader({
             </div>
 
             {renderConnectionButton()}
-            <ChatButton recipientId={profile.id} currentUserId={currentUserId} />
+            <ChatButton
+              recipientId={profile.id}
+              currentUserId={currentUserId}
+            />
           </div>
 
           <div className="mt-4">

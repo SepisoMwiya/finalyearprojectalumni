@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { Users, Briefcase, School } from "lucide-react";
+import { Users, Briefcase, School, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
 
@@ -67,7 +67,9 @@ export default function SuggestedConnections() {
       });
 
       // Remove the connected alumni from suggestions
-      setSuggestedAlumni(prev => prev.filter(alumni => alumni.id !== alumniId));
+      setSuggestedAlumni((prev) =>
+        prev.filter((alumni) => alumni.id !== alumniId)
+      );
       router.refresh();
     } catch (error) {
       toast({
@@ -98,16 +100,23 @@ export default function SuggestedConnections() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {suggestedAlumni.map((alumni) => (
-              <Card key={alumni.id} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={alumni.id}
+                className="hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <Image
-                      src={alumni.imageUrl}
-                      alt={alumni.name}
-                      width={60}
-                      height={60}
-                      className="rounded-full"
-                    />
+                    {alumni.imageUrl ? (
+                      <Image
+                        src={alumni.imageUrl}
+                        alt={alumni.name}
+                        width={60}
+                        height={60}
+                        className="rounded-full"
+                      />
+                    ) : (
+                      <User className="h-16 w-16 text-gray-400" />
+                    )}
                     <div>
                       <h3 className="font-semibold">{alumni.name}</h3>
                       {alumni.role && (
@@ -124,7 +133,10 @@ export default function SuggestedConnections() {
                   </div>
 
                   <div className="space-y-3">
-                    <Badge variant="secondary" className="w-full justify-center">
+                    <Badge
+                      variant="secondary"
+                      className="w-full justify-center"
+                    >
                       {alumni.reasonForSuggestion}
                     </Badge>
                     <p className="text-sm text-gray-600 text-center">
@@ -132,7 +144,7 @@ export default function SuggestedConnections() {
                     </p>
                   </div>
 
-                  <Button 
+                  <Button
                     className="w-full mt-4"
                     onClick={() => handleConnect(alumni.id)}
                   >
