@@ -46,10 +46,6 @@ export default function ProfileTabs({
           <Users className="h-4 w-4" />
           Connections
         </TabsTrigger>
-        <TabsTrigger value="projects" className="flex gap-2">
-          <BookOpen className="h-4 w-4" />
-          Projects
-        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="experience">
@@ -152,28 +148,6 @@ export default function ProfileTabs({
                       {formatDistanceToNow(new Date(connection.createdAt))} ago
                     </p>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Card>
-      </TabsContent>
-
-      <TabsContent value="projects">
-        <Card className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {profile.projects?.map((project: any) => (
-              <Card key={project.id} className="p-4">
-                <h3 className="font-semibold">{project.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  {project.description}
-                </p>
-                <div className="flex gap-2 mt-2">
-                  {project.categories?.map((category: any) => (
-                    <Badge key={category.id} variant="secondary">
-                      {category.name}
-                    </Badge>
-                  ))}
                 </div>
               </Card>
             ))}
