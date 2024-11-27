@@ -35,7 +35,9 @@ export default function NotificationsDropdown() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const socket = useWebSocket();
-  const currentUserId = 1; // Replace with actual current user ID
+
+  const unreadNotifications = notifications.filter((n) => !n.read);
+  const readNotifications = notifications.filter((n) => n.read);
 
   const fetchNotifications = async () => {
     try {
@@ -51,23 +53,45 @@ export default function NotificationsDropdown() {
     }
   };
 
+  const markAsRead = async (notificationId?: number) => {
+    try {
+      const response = await fetch("/api/notifications/mark-read", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notificationId }),
+      });
+
+      if (response.ok) {
+        fetchNotifications();
+      }
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.read) {
+      await markAsRead(notification.id);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
 
-    if (socket && currentUserId) {
-      socket.emit("join-notifications", currentUserId);
-
-      socket.on(`notifications:${currentUserId}`, () => {
+    if (socket) {
+      socket.on("notifications", () => {
         fetchNotifications();
       });
     }
 
     return () => {
-      if (socket && currentUserId) {
-        socket.off(`notifications:${currentUserId}`);
+      if (socket) {
+        socket.off("notifications");
       }
     };
-  }, [socket, currentUserId]);
+  }, [socket]);
 
   const handleAcceptConnection = async (fromAlumniId: number) => {
     try {
@@ -125,74 +149,146 @@ export default function NotificationsDropdown() {
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5 text-white" />
-          {notifications.length > 0 && (
+          {unreadNotifications.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-              {notifications.length}
+              {unreadNotifications.length}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-4">
-          <h3 className="font-semibold">Notifications</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">Notifications</h3>
+            {unreadNotifications.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-sm text-muted-foreground"
+                onClick={() => markAsRead()}
+              >
+                Mark all as read
+              </Button>
+            )}
+          </div>
           {isLoading ? (
             <div className="text-center py-4">Loading...</div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-4 text-gray-500">
-              No new notifications
+              No notifications
             </div>
           ) : (
-            <div className="space-y-4 mt-4">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg"
-                >
-                  <div className="flex-1">
-                    <p className="text-sm">
-                      <Link href={`/alumni/${notification.fromAlumni.id}`}>
-                        <span className="font-semibold hover:underline">
-                          {notification.fromAlumni.firstName}{" "}
-                          {notification.fromAlumni.lastName}
-                        </span>{" "}
-                      </Link>
-                      {notification.type === "CONNECTION_REQUEST" ? (
-                        <>sent you a connection request</>
-                      ) : notification.type === "MENTORSHIP_REQUEST" ? (
-                        <>sent you a mentorship request</>
-                      ) : notification.type === "NEW_MESSAGE" ? (
-                        <Link
-                          href={`/chats/${notification.chatId}`}
-                          className="hover:underline"
-                        >
-                          <>sent you a message</>
-                        </Link>
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDistanceToNow(new Date(notification.createdAt))}{" "}
-                      ago
-                    </p>
-                    {notification.type === "MENTORSHIP_REQUEST" && (
-                      <div className="mt-2 flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "accept")}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "decline")}
-                        >
-                          Decline
-                        </Button>
+            <div className="space-y-4">
+              {unreadNotifications.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">New</h4>
+                  {unreadNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <Link href={`/alumni/${notification.fromAlumni.id}`}>
+                            <span className="font-semibold hover:underline">
+                              {notification.fromAlumni.firstName}{" "}
+                              {notification.fromAlumni.lastName}
+                            </span>{" "}
+                          </Link>
+                          {notification.type === "CONNECTION_REQUEST" ? (
+                            <>sent you a connection request</>
+                          ) : notification.type === "MENTORSHIP_REQUEST" ? (
+                            <>sent you a mentorship request</>
+                          ) : notification.type === "NEW_MESSAGE" ? (
+                            <Link
+                              href={`/chats/${notification.chatId}`}
+                              className="hover:underline"
+                            >
+                              <>sent you a message</>
+                            </Link>
+                          ) : null}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(notification.createdAt))}{" "}
+                          ago
+                        </p>
+                        {notification.type === "MENTORSHIP_REQUEST" && (
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "accept")}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "decline")}
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              {readNotifications.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Earlier</h4>
+                  {readNotifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className="flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <p className="text-sm">
+                          <Link href={`/alumni/${notification.fromAlumni.id}`}>
+                            <span className="font-semibold hover:underline">
+                              {notification.fromAlumni.firstName}{" "}
+                              {notification.fromAlumni.lastName}
+                            </span>{" "}
+                          </Link>
+                          {notification.type === "CONNECTION_REQUEST" ? (
+                            <>sent you a connection request</>
+                          ) : notification.type === "MENTORSHIP_REQUEST" ? (
+                            <>sent you a mentorship request</>
+                          ) : notification.type === "NEW_MESSAGE" ? (
+                            <Link
+                              href={`/chats/${notification.chatId}`}
+                              className="hover:underline"
+                            >
+                              <>sent you a message</>
+                            </Link>
+                          ) : null}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(notification.createdAt))}{" "}
+                          ago
+                        </p>
+                        {notification.type === "MENTORSHIP_REQUEST" && (
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "accept")}
+                            >
+                              Accept
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "decline")}
+                            >
+                              Decline
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
