@@ -49,6 +49,8 @@ export async function GET(req: Request) {
           select: {
             content: true,
             createdAt: true,
+            read: true,
+            senderId: true,
           },
         },
       },

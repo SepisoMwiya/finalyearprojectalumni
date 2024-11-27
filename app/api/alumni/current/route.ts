@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 export async function GET() {
   try {
@@ -12,7 +12,9 @@ export async function GET() {
     const userEmail = user.emailAddresses[0].emailAddress;
 
     const alumni = await db.alumni.findFirst({
-      where: { email: userEmail },
+      where: {
+        email: userEmail,
+      },
       select: {
         id: true,
       },
@@ -24,7 +26,7 @@ export async function GET() {
 
     return NextResponse.json(alumni);
   } catch (error) {
-    console.error("[CURRENT_ALUMNI]", error);
+    console.error("[CURRENT_ALUMNI_GET]", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 }

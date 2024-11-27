@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
 
 interface Chat {
   id: number;
@@ -24,29 +25,89 @@ interface Chat {
   lastMessage?: {
     content: string;
     createdAt: string;
+    read: boolean;
+    senderId: number;
   };
 }
 
 export default function MessagesDropdown() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentAlumniId, setCurrentAlumniId] = useState<number | null>(null);
   const router = useRouter();
+  const { user } = useUser();
 
+  // Fetch current alumni ID on component mount
   useEffect(() => {
-    const fetchChats = async () => {
+    const fetchCurrentAlumni = async () => {
+      if (!user?.emailAddresses[0]?.emailAddress) return;
+      
       try {
-        const response = await fetch("/api/chats");
+        const response = await fetch(`/api/alumni/current`);
         if (response.ok) {
           const data = await response.json();
-          setChats(data);
+          setCurrentAlumniId(data.id);
         }
       } catch (error) {
-        console.error("Error fetching chats:", error);
-      } finally {
-        setIsLoading(false);
+        console.error("Error fetching current alumni:", error);
       }
     };
 
+    fetchCurrentAlumni();
+  }, [user]);
+
+  const unreadChats = chats.filter(
+    (chat) => 
+      chat.lastMessage && 
+      !chat.lastMessage.read && 
+      chat.lastMessage.senderId !== currentAlumniId
+  );
+
+  const readChats = chats.filter(
+    (chat) => 
+      !chat.lastMessage || 
+      chat.lastMessage.read || 
+      chat.lastMessage.senderId === currentAlumniId
+  );
+
+  const fetchChats = async () => {
+    try {
+      const response = await fetch("/api/chats");
+      if (response.ok) {
+        const data = await response.json();
+        setChats(data);
+      }
+    } catch (error) {
+      console.error("Error fetching chats:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const markAsRead = async (chatId?: number) => {
+    try {
+      const response = await fetch("/api/chats/mark-read", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chatId }),
+      });
+
+      if (response.ok) {
+        fetchChats();
+      }
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+    }
+  };
+
+  const handleChatClick = async (chatId: number) => {
+    await markAsRead(chatId);
+    router.push(`/chats/${chatId}`);
+  };
+
+  useEffect(() => {
     fetchChats();
   }, []);
 
@@ -55,16 +116,28 @@ export default function MessagesDropdown() {
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <MessageCircle className="h-5 w-5 text-white" />
-          {chats.length > 0 && (
+          {unreadChats.length > 0 && (
             <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
-              {chats.length}
+              {unreadChats.length}
             </span>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
         <div className="p-4">
-          <h3 className="font-semibold">Messages</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold">Messages</h3>
+            {unreadChats.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-sm text-muted-foreground"
+                onClick={() => markAsRead()}
+              >
+                Mark all as read
+              </Button>
+            )}
+          </div>
           {isLoading ? (
             <div className="text-center py-4">Loading...</div>
           ) : chats.length === 0 ? (
@@ -72,51 +145,73 @@ export default function MessagesDropdown() {
               No messages yet
             </div>
           ) : (
-            <div className="space-y-4 mt-4">
-              {chats.map((chat) => {
-                const otherMember = chat.members[0];
-                return (
-                  <Link
-                    key={chat.id}
-                    href={`/chats/${chat.id}`}
-                    className="flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg"
-                  >
-                    <div className="relative h-10 w-10 flex-shrink-0">
-                      <Image
-                        src={otherMember.profileImage || "/default-avatar.png"}
-                        alt={`${otherMember.firstName} ${otherMember.lastName}`}
-                        className="rounded-full object-cover"
-                        width={40}
-                        height={40}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold truncate">
-                        {otherMember.firstName} {otherMember.lastName}
-                      </p>
-                      {chat.lastMessage && (
-                        <>
-                          <p className="text-sm text-gray-600 truncate">
-                            {chat.lastMessage.content}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {formatDistanceToNow(
-                              new Date(chat.lastMessage.createdAt),
-                              {
-                                addSuffix: true,
-                              }
-                            )}
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="space-y-4">
+              {unreadChats.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">New</h4>
+                  {unreadChats.map((chat) => (
+                    <ChatItem
+                      key={chat.id}
+                      chat={chat}
+                      onClick={() => handleChatClick(chat.id)}
+                    />
+                  ))}
+                </div>
+              )}
+              {readChats.length > 0 && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">Earlier</h4>
+                  {readChats.map((chat) => (
+                    <ChatItem
+                      key={chat.id}
+                      chat={chat}
+                      onClick={() => handleChatClick(chat.id)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function ChatItem({ chat, onClick }: { chat: Chat; onClick: () => void }) {
+  const otherMember = chat.members[0];
+  
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-start gap-4 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+    >
+      <div className="relative h-10 w-10 flex-shrink-0">
+        <Image
+          src={otherMember.profileImage || "/default-avatar.png"}
+          alt={`${otherMember.firstName} ${otherMember.lastName}`}
+          className="rounded-full object-cover"
+          width={40}
+          height={40}
+        />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold truncate">
+          {otherMember.firstName} {otherMember.lastName}
+        </p>
+        {chat.lastMessage && (
+          <>
+            <p className="text-sm text-gray-600 truncate">
+              {chat.lastMessage.content}
+            </p>
+            <p className="text-xs text-gray-500">
+              {formatDistanceToNow(new Date(chat.lastMessage.createdAt), {
+                addSuffix: true,
+              })}
+            </p>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
