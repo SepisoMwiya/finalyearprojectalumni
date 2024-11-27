@@ -185,6 +185,7 @@ model Notification {
   toAlumni   Alumni  @relation("receivedNotifications", fields: [toAlumniId], references: [id])
   fromAlumni   Alumni  @relation("sentNotifications", fields: [fromAlumniId], references: [id])
   chatId       Int?
+  mentorshipRequestId Int?
 }
 
 model School {

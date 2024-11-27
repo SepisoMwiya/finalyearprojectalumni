@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useWebSocket } from "@/hooks/use-websocket";
+import { toast } from "@/hooks/use-toast";
 
 interface Notification {
   id: number;
@@ -26,6 +27,7 @@ interface Notification {
     profileImage: string | null;
   };
   chatId: number;
+  mentorshipRequestId: number;
 }
 
 export default function NotificationsDropdown() {
@@ -87,6 +89,37 @@ export default function NotificationsDropdown() {
     }
   };
 
+  const handleMentorshipAction = async (
+    requestId: number,
+    action: "accept" | "decline"
+  ) => {
+    try {
+      const response = await fetch(`/api/mentorship/${requestId}/${action}`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to process mentorship request");
+      }
+
+      // Refresh notifications
+      fetchNotifications();
+      router.refresh();
+
+      toast({
+        title: "Success",
+        description: `Mentorship request ${action}ed successfully`,
+      });
+    } catch (error) {
+      console.error(`Error ${action}ing mentorship request:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to ${action} mentorship request`,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -125,6 +158,8 @@ export default function NotificationsDropdown() {
                       </Link>
                       {notification.type === "CONNECTION_REQUEST" ? (
                         <>sent you a connection request</>
+                      ) : notification.type === "MENTORSHIP_REQUEST" ? (
+                        <>sent you a mentorship request</>
                       ) : notification.type === "NEW_MESSAGE" ? (
                         <Link
                           href={`/chats/${notification.chatId}`}
@@ -138,17 +173,19 @@ export default function NotificationsDropdown() {
                       {formatDistanceToNow(new Date(notification.createdAt))}{" "}
                       ago
                     </p>
-                    {notification.type === "CONNECTION_REQUEST" && (
+                    {notification.type === "MENTORSHIP_REQUEST" && (
                       <div className="mt-2 flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() =>
-                            handleAcceptConnection(notification.fromAlumni.id)
-                          }
+                          onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "accept")}
                         >
                           Accept
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleMentorshipAction(notification.mentorshipRequestId, "decline")}
+                        >
                           Decline
                         </Button>
                       </div>

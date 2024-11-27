@@ -68,6 +68,7 @@ export async function POST(req: Request) {
           fromAlumniId: mentee.id,
           toAlumniId: mentor.alumniId,
           read: false,
+          mentorshipRequestId: request.id,
         },
       });
 
