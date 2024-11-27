@@ -26,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "../../ui/data-table";
+import EditResourceModal from "../edit-resource-modal";
 
 type CareerResource = {
   id: string;
@@ -48,6 +49,9 @@ export default function CareerResourcesTab({
     category: "",
     url: "",
   });
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedResource, setSelectedResource] =
+    useState<CareerResource | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,6 +70,25 @@ export default function CareerResourcesTab({
       }
     } catch (error) {
       console.error("Error creating resource:", error);
+    }
+  };
+
+  const handleEdit = (resource: CareerResource) => {
+    setSelectedResource(resource);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDelete = async (resourceId: string) => {
+    try {
+      const response = await fetch(`/api/career-resources/${resourceId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error deleting resource:", error);
     }
   };
 
@@ -112,14 +135,14 @@ export default function CareerResourcesTab({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => console.log("Edit", resource.id)}
+                onClick={() => handleEdit(resource)}
                 className="cursor-pointer"
               >
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => console.log("Delete", resource.id)}
+                onClick={() => handleDelete(resource.id)}
                 className="cursor-pointer text-red-600"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -217,6 +240,18 @@ export default function CareerResourcesTab({
           </form>
         </DialogContent>
       </Dialog>
+
+      {selectedResource && (
+        <EditResourceModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedResource(null);
+          }}
+          resource={selectedResource}
+          onResourceUpdated={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }
