@@ -1,9 +1,17 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProjectManagement from "./project-management";
 import CareerManagement from "./career-management";
-import { Gift, Newspaper, Projector, User, BookOpen } from "lucide-react";
+import {
+  Gift,
+  Newspaper,
+  Projector,
+  User,
+  BookOpen,
+  Camera,
+} from "lucide-react";
 import NewsManagement from "./news-management";
 import CareerResourcesTabWrapper from "./tabs/career-resources-tab-wrapper";
+import GalleryTabWrapper from "./tabs/gallery-tab-wrapper";
 
 export default function ContentManagementTabs() {
   return (
@@ -28,6 +36,10 @@ export default function ContentManagementTabs() {
           <BookOpen />
           Career Resources
         </TabsTrigger>
+        <TabsTrigger value="gallery" className="flex items-center gap-2">
+          <Camera className="h-4 w-4" />
+          Gallery
+        </TabsTrigger>
       </TabsList>
       <TabsContent value="projects">
         <ProjectManagement />
@@ -45,6 +57,9 @@ export default function ContentManagementTabs() {
       </TabsContent>
       <TabsContent value="career-resources">
         <CareerResourcesTabWrapper />
+      </TabsContent>
+      <TabsContent value="gallery">
+        <GalleryTabWrapper />
       </TabsContent>
     </Tabs>
   );

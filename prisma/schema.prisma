@@ -342,4 +342,13 @@ model MentorshipRequest {
   @@index([menteeId])
 }
 
+model GalleryImage {
+  id          Int      @id @default(autoincrement())
+  url         String   @db.Text
+  caption     String?  @db.VarChar(255)
+  category    String?  @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
