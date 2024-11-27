@@ -46,9 +46,8 @@ async function ProgramsAndEventsPage() {
   return (
     <>
       <Events featuredEvent={featuredEvent} upcomingEvents={upcomingEvents} />
-      <div className="container mt-10 flex">
+      <div className="container mt-10 flex flex-col md:flex-row gap-4">
         <LatestNews news={news} />
-
         <PhotoGallery />
       </div>
     </>
