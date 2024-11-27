@@ -22,7 +22,7 @@ export default async function MentorshipPage() {
   });
 
   if (!alumni) {
-    redirect("/alumni/register");
+    redirect("/register");
   }
 
   return (
