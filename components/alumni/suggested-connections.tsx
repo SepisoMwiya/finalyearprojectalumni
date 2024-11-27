@@ -1,9 +1,13 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { Users, Briefcase, School } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 interface SuggestedAlumni {
   id: number;
@@ -16,30 +20,72 @@ interface SuggestedAlumni {
   reasonForSuggestion: string;
 }
 
-const suggestedAlumni: SuggestedAlumni[] = [
-  {
-    id: 1,
-    name: "Dr. Chilufya Mulenga",
-    imageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-    role: "Chief Medical Officer",
-    company: "University Teaching Hospital",
-    school: "School of Medicine",
-    commonConnections: 15,
-    reasonForSuggestion: "From your school",
-  },
-  {
-    id: 2,
-    name: "Prof. Namwinga Chintu",
-    imageUrl: "https://randomuser.me/api/portraits/women/2.jpg",
-    role: "Dean",
-    company: "UNZA School of Business",
-    school: "School of Business",
-    commonConnections: 23,
-    reasonForSuggestion: "Common connections",
-  },
-];
-
 export default function SuggestedConnections() {
+  const [suggestedAlumni, setSuggestedAlumni] = useState<SuggestedAlumni[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    async function fetchSuggestions() {
+      try {
+        const response = await fetch("/api/alumni/suggested");
+        if (!response.ok) throw new Error("Failed to fetch suggestions");
+        const data = await response.json();
+        setSuggestedAlumni(data);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load suggested connections",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchSuggestions();
+  }, []);
+
+  const handleConnect = async (alumniId: number) => {
+    try {
+      const response = await fetch("/api/connections/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ toAlumniId: alumniId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send connection request");
+      }
+
+      toast({
+        title: "Success",
+        description: "Connection request sent successfully",
+      });
+
+      // Remove the connected alumni from suggestions
+      setSuggestedAlumni(prev => prev.filter(alumni => alumni.id !== alumniId));
+      router.refresh();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send connection request",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading suggestions...</div>;
+  }
+
+  if (suggestedAlumni.length === 0) {
+    return null;
+  }
+
   return (
     <section className="mt-12">
       <Card>
@@ -52,10 +98,7 @@ export default function SuggestedConnections() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {suggestedAlumni.map((alumni) => (
-              <Card
-                key={alumni.id}
-                className="hover:shadow-lg transition-shadow"
-              >
+              <Card key={alumni.id} className="hover:shadow-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-4">
                     <Image
@@ -67,10 +110,12 @@ export default function SuggestedConnections() {
                     />
                     <div>
                       <h3 className="font-semibold">{alumni.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Briefcase className="h-4 w-4" />
-                        <span>{alumni.role}</span>
-                      </div>
+                      {alumni.role && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Briefcase className="h-4 w-4" />
+                          <span>{alumni.role}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-sm text-gray-600">
                         <School className="h-4 w-4" />
                         <span>{alumni.school}</span>
@@ -79,10 +124,7 @@ export default function SuggestedConnections() {
                   </div>
 
                   <div className="space-y-3">
-                    <Badge
-                      variant="secondary"
-                      className="w-full justify-center"
-                    >
+                    <Badge variant="secondary" className="w-full justify-center">
                       {alumni.reasonForSuggestion}
                     </Badge>
                     <p className="text-sm text-gray-600 text-center">
@@ -90,7 +132,12 @@ export default function SuggestedConnections() {
                     </p>
                   </div>
 
-                  <Button className="w-full mt-4">Connect</Button>
+                  <Button 
+                    className="w-full mt-4"
+                    onClick={() => handleConnect(alumni.id)}
+                  >
+                    Connect
+                  </Button>
                 </CardContent>
               </Card>
             ))}
