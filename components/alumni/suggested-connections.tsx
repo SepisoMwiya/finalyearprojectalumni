@@ -106,17 +106,7 @@ export default function SuggestedConnections() {
               >
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    {alumni.imageUrl ? (
-                      <Image
-                        src={alumni.imageUrl}
-                        alt={alumni.name}
-                        width={60}
-                        height={60}
-                        className="rounded-full"
-                      />
-                    ) : (
-                      <User className="h-16 w-16 text-gray-400" />
-                    )}
+                    <User className="h-16 w-16 text-gray-400" />
                     <div>
                       <h3 className="font-semibold">{alumni.name}</h3>
                       {alumni.role && (
